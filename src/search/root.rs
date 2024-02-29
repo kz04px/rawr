@@ -13,7 +13,7 @@ pub fn root(
 ) -> Result<Mv, &'static str> {
     let mut stats = Stats::default();
     let start = Instant::now();
-    let mv = random::random(&pos, &mut stats);
+    let mv = greedy::greedy(&pos, &mut stats);
     let elapsed = start.elapsed();
 
     if mv.is_none() {

@@ -46,3 +46,54 @@ Aggression value 0.070 weight 5.0 weighted 0.349 contribution 11.59% name Win wh
 Aggression value 0.082 weight 5.0 weighted 0.408 contribution 13.55% name Capture frequency
 - Aggressive   0.214
 ```
+
+---
+
+## v0.2.0
+1 ply search with material eval.
+
+Match results:
+```
+1+0.01s:
+    Score of Rawr-0.2.0 vs Rawr-0.1.0: 635 - 2 - 1363  [0.658] 2000
+    Elo difference: 113.9 +/- 7.9, LOS: 100.0 %, DrawRatio: 68.2 %
+```
+Style script:
+```
+Filter: White
+Score:
+- games   1000
+- wins       8 (0.80%)
+- draws    980 (98.00%)
+- losses    12 (1.20%)
+Styles:
+Aggression value 0.808 weight 4.0 weighted 3.230 contribution 43.47% name Game length
+Aggression value 0.626 weight 2.0 weighted 1.251 contribution 16.84% name Capture early
+Aggression value 0.206 weight 4.0 weighted 0.824 contribution 11.09% name Capture near king
+Aggression value 0.070 weight 2.0 weighted 0.140 contribution 1.88% name Move near king
+Aggression value 0.005 weight 0.2 weighted 0.001 contribution 0.01% name Castle opposite
+Aggression value 0.049 weight 1.0 weighted 0.049 contribution 0.66% name Push pawns
+Aggression value 0.047 weight 5.0 weighted 0.233 contribution 3.14% name Checks
+Aggression value 0.000 weight 5.0 weighted 0.000 contribution 0.00% name Win while behind
+Aggression value 0.340 weight 5.0 weighted 1.702 contribution 22.90% name Capture frequency
+- Aggressive   0.527
+```
+```
+Filter: Black
+Score:
+- games   1000
+- wins      12 (1.20%)
+- draws    980 (98.00%)
+- losses     8 (0.80%)
+Styles:
+Aggression value 0.808 weight 4.0 weighted 3.230 contribution 43.43% name Game length
+Aggression value 0.635 weight 2.0 weighted 1.270 contribution 17.08% name Capture early
+Aggression value 0.189 weight 4.0 weighted 0.758 contribution 10.19% name Capture near king
+Aggression value 0.069 weight 2.0 weighted 0.138 contribution 1.85% name Move near king
+Aggression value 0.005 weight 0.2 weighted 0.001 contribution 0.01% name Castle opposite
+Aggression value 0.048 weight 1.0 weighted 0.048 contribution 0.64% name Push pawns
+Aggression value 0.046 weight 5.0 weighted 0.232 contribution 3.11% name Checks
+Aggression value 0.000 weight 5.0 weighted 0.000 contribution 0.00% name Win while behind
+Aggression value 0.352 weight 5.0 weighted 1.761 contribution 23.67% name Capture frequency
+- Aggressive   0.528
+```
