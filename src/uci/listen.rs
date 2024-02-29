@@ -3,7 +3,10 @@ use crate::uci::{go, position};
 use crate::{chess::position::Position, uci::moves};
 
 pub fn listen() {
-    println!("id name Rawr 0.8.1");
+    println!(
+        "id name Rawr {}",
+        option_env!("CARGO_PKG_VERSION").unwrap_or("unknown")
+    );
     println!("id author kz04px");
     println!("uciok");
 
