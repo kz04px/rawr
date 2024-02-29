@@ -7,6 +7,16 @@ fn main() -> io::Result<()> {
 
     match input.trim() {
         "uci" => uci::listen::listen(),
+        "about" => {
+            println!(
+                "Rawr version {}",
+                option_env!("CARGO_PKG_VERSION").unwrap_or("unknown")
+            );
+            println!("https://github.com/kz04px/rawr");
+            if cfg!(debug_assertions) {
+                println!("Debug enabled");
+            }
+        }
         "quit" => {}
         _ => println!("Unknown protocol"),
     };
