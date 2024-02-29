@@ -16,11 +16,13 @@ mod tests {
             ("8/8/8/8/Q3r3/6k1/8/6K1 b - - 0 1", "e4e1"),
         ];
 
+        let should_stop = |_stats: &Stats| false;
+
         for (fen, movestr) in tests {
             let pos = Position::from_fen(fen);
             let mut history = vec![];
             let mut stats = Stats::default();
-            let _ = negamax::negamax(&pos, &mut history, &mut stats, 2);
+            let _ = negamax::negamax(&pos, &mut history, &mut stats, &should_stop, 2);
             assert!(!pos.in_check());
             assert!(stats.best_move.is_some());
             assert_eq!(movestr, stats.best_move.unwrap().to_uci(&pos));
@@ -38,12 +40,14 @@ mod tests {
             ("4k3/8/8/2p5/1N1P4/8/8/4K3 b - - 0 1", "c5b4"),
         ];
 
+        let should_stop = |_stats: &Stats| false;
+
         for (fen, movestr) in tests {
             println!("{}", fen);
             let pos = Position::from_fen(fen);
             let mut history = vec![];
             let mut stats = Stats::default();
-            let _ = negamax::negamax(&pos, &mut history, &mut stats, 2);
+            let _ = negamax::negamax(&pos, &mut history, &mut stats, &should_stop, 2);
             assert!(!pos.in_check());
             assert!(stats.best_move.is_some());
             assert_eq!(movestr, stats.best_move.unwrap().to_uci(&pos));

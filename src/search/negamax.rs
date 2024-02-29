@@ -26,9 +26,19 @@ fn eval(pos: &Position) -> i32 {
 }
 
 #[must_use]
-pub fn negamax(pos: &Position, history: &mut Vec<u64>, stats: &mut Stats, depth: i32) -> i32 {
+pub fn negamax(
+    pos: &Position,
+    history: &mut Vec<u64>,
+    stats: &mut Stats,
+    should_stop: &impl Fn(&Stats) -> bool,
+    depth: i32,
+) -> i32 {
     if depth <= 0 {
         return eval(pos);
+    }
+
+    if should_stop(stats) {
+        return 0;
     }
 
     let mut best_move = Option::<Mv>::default();
@@ -48,7 +58,7 @@ pub fn negamax(pos: &Position, history: &mut Vec<u64>, stats: &mut Stats, depth:
         let npos = pos.after_move::<true>(&mv);
         history.push(npos.hash);
 
-        let score = -negamax(&npos, history, stats, depth - 1);
+        let score = -negamax(&npos, history, stats, should_stop, depth - 1);
         history.pop();
 
         if score > best_score {
