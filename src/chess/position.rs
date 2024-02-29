@@ -72,6 +72,13 @@ impl Position {
     }
 
     #[must_use]
+    pub fn from_flipped(pos: &Position) -> Self {
+        let mut npos = *pos;
+        npos.flip();
+        npos
+    }
+
+    #[must_use]
     pub const fn get_turn(&self) -> Colour {
         self.turn
     }
@@ -147,6 +154,11 @@ impl Position {
     #[must_use]
     pub fn get_kings(&self) -> Bitboard {
         self.pieces[Piece::King as usize]
+    }
+
+    #[must_use]
+    pub fn get_piece(&self, idx: usize) -> Bitboard {
+        self.pieces[idx]
     }
 
     #[must_use]

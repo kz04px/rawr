@@ -1,3 +1,4 @@
+pub mod eval;
 pub mod info;
 pub mod negamax;
 pub mod root;

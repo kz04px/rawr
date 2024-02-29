@@ -1,29 +1,10 @@
 use crate::chess::{mv::Mv, position::Position};
+use crate::search::eval::eval;
 use crate::search::stats::Stats;
 
 pub const INF: i32 = 10_000_000;
 const MATE_SCORE: i32 = 1_000_000;
 const DRAW_SCORE: i32 = -50;
-
-#[must_use]
-fn eval(pos: &Position) -> i32 {
-    let mut score = 0;
-
-    // Us
-    score += 100 * (pos.get_pawns() & pos.get_us()).count();
-    score += 300 * (pos.get_knights() & pos.get_us()).count();
-    score += 320 * (pos.get_bishops() & pos.get_us()).count();
-    score += 500 * (pos.get_rooks() & pos.get_us()).count();
-    score += 900 * (pos.get_queens() & pos.get_us()).count();
-    // Them
-    score -= 100 * (pos.get_pawns() & pos.get_them()).count();
-    score -= 300 * (pos.get_knights() & pos.get_them()).count();
-    score -= 320 * (pos.get_bishops() & pos.get_them()).count();
-    score -= 500 * (pos.get_rooks() & pos.get_them()).count();
-    score -= 900 * (pos.get_queens() & pos.get_them()).count();
-
-    score
-}
 
 #[must_use]
 pub fn negamax(
