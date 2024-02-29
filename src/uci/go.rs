@@ -8,23 +8,28 @@ use std::str::SplitAsciiWhitespace;
 
 fn info_printer(info: &Info) {
     print!("info");
-    if let Some(s) = info.score {
-        print!(" score cp {s}");
-    }
-    if let Some(s) = info.mate {
-        print!(" score mate {s}");
-    }
     if let Some(d) = info.depth {
         print!(" depth {d}");
     }
     if let Some(d) = info.seldepth {
         print!(" seldepth {d}");
     }
-    if let Some(t) = info.elapsed {
-        print!(" time {t}");
+    if let Some(s) = info.score {
+        print!(" score cp {s}");
+    }
+    if let Some(s) = info.mate {
+        print!(" score mate {s}");
     }
     if let Some(n) = info.nodes {
         print!(" nodes {n}");
+    }
+    if let Some(t) = info.elapsed {
+        print!(" time {t}");
+    }
+    if let (Some(t), Some(n)) = (info.elapsed, info.nodes) {
+        if t > 0 {
+            print!(" nps {}", (n as u128 * 1000) / t);
+        }
     }
     if !info.pv.is_empty() {
         print!(" pv");
@@ -84,7 +89,7 @@ pub fn parse_go(stream: &mut SplitAsciiWhitespace) -> Result<settings::Type, &'s
     }
 }
 
-pub fn go(stream: &mut SplitAsciiWhitespace, pos: &mut Position, history: &mut [u64]) {
+pub fn go(stream: &mut SplitAsciiWhitespace, pos: &mut Position, history: &mut Vec<u64>) {
     let opts = parse_go(stream);
     if opts.is_err() {
         return;

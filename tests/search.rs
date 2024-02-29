@@ -2,7 +2,7 @@
 mod tests {
     use rawr::{
         chess::position::Position,
-        search::{greedy, stats::Stats},
+        search::{negamax, stats::Stats},
     };
 
     #[test]
@@ -18,12 +18,12 @@ mod tests {
 
         for (fen, movestr) in tests {
             let pos = Position::from_fen(fen);
-            let history = vec![];
+            let mut history = vec![];
             let mut stats = Stats::default();
-            let bestmove = greedy::greedy(&pos, &history, &mut stats);
+            let _ = negamax::negamax(&pos, &mut history, &mut stats, 2);
             assert!(!pos.in_check());
-            assert!(bestmove.is_some());
-            assert_eq!(movestr, bestmove.unwrap().to_uci(&pos));
+            assert!(stats.best_move.is_some());
+            assert_eq!(movestr, stats.best_move.unwrap().to_uci(&pos));
         }
     }
 
@@ -41,12 +41,12 @@ mod tests {
         for (fen, movestr) in tests {
             println!("{}", fen);
             let pos = Position::from_fen(fen);
-            let history = vec![];
+            let mut history = vec![];
             let mut stats = Stats::default();
-            let bestmove = greedy::greedy(&pos, &history, &mut stats);
+            let _ = negamax::negamax(&pos, &mut history, &mut stats, 2);
             assert!(!pos.in_check());
-            assert!(bestmove.is_some());
-            assert_eq!(movestr, bestmove.unwrap().to_uci(&pos));
+            assert!(stats.best_move.is_some());
+            assert_eq!(movestr, stats.best_move.unwrap().to_uci(&pos));
         }
     }
 }

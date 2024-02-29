@@ -7,31 +7,31 @@ use std::time::Instant;
 #[must_use]
 pub fn root(
     pos: Position,
-    history: &[u64],
+    history: &mut Vec<u64>,
     _settings: settings::Type,
     info_printer: fn(&Info),
 ) -> Result<Mv, &'static str> {
     let mut stats = Stats::default();
     let start = Instant::now();
-    let mv = greedy::greedy(&pos, &history, &mut stats);
+    let score = negamax::negamax(&pos, history, &mut stats, 2);
     let elapsed = start.elapsed();
 
-    if mv.is_none() {
+    if stats.best_move.is_none() {
         return Err("No bestmove");
     }
 
-    let pv = vec![mv.unwrap()];
+    let pv = vec![stats.best_move.unwrap()];
 
     info_printer(&Info {
         pos,
         depth: Some(stats.depth),
         seldepth: Some(stats.seldepth),
         nodes: Some(stats.nodes),
-        score: None,
+        score: Some(score),
         mate: None,
         elapsed: Some(elapsed.as_millis()),
         pv,
     });
 
-    Ok(mv.unwrap())
+    Ok(stats.best_move.unwrap())
 }
