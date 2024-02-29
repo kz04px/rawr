@@ -7,13 +7,13 @@ use std::time::Instant;
 #[must_use]
 pub fn root(
     pos: Position,
-    _history: &[u64],
+    history: &[u64],
     _settings: settings::Type,
     info_printer: fn(&Info),
 ) -> Result<Mv, &'static str> {
     let mut stats = Stats::default();
     let start = Instant::now();
-    let mv = greedy::greedy(&pos, &mut stats);
+    let mv = greedy::greedy(&pos, &history, &mut stats);
     let elapsed = start.elapsed();
 
     if mv.is_none() {

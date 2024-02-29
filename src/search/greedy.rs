@@ -22,14 +22,31 @@ fn eval(pos: &Position) -> i32 {
 }
 
 #[must_use]
-pub fn greedy(pos: &Position, stats: &mut Stats) -> Option<Mv> {
+pub fn greedy(pos: &Position, history: &[u64], stats: &mut Stats) -> Option<Mv> {
     let mut best_move = Option::<Mv>::default();
     let mut best_score = -1_000_000;
 
     pos.move_generator(|mv| {
         stats.nodes += 1;
-        let npos = pos.after_move::<false>(&mv);
-        let score = -eval(&npos);
+        let npos = pos.after_move::<true>(&mv);
+        let is_threefold = history.iter().fold(
+            0,
+            |acc, hash| if *hash == npos.hash { acc + 1 } else { acc },
+        ) >= 2;
+        let in_check = npos.in_check();
+        let can_move = npos.count_moves() > 0;
+        let is_checkmate = in_check && !can_move;
+        let is_50move = npos.halfmoves >= 100 && !is_checkmate;
+        let is_stalemate = !in_check && !can_move;
+
+        let score = if is_threefold || is_50move || is_stalemate {
+            -50
+        } else if is_checkmate {
+            1_000_000
+        } else {
+            -eval(&npos)
+        };
+
         if score > best_score {
             best_score = score;
             best_move = Some(mv);

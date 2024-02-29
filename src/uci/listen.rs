@@ -2,7 +2,7 @@ use crate::uci::{go, position};
 use crate::{chess::position::Position, uci::moves};
 
 pub fn listen() {
-    println!("id name Rawr 0.2.0");
+    println!("id name Rawr 0.3.0");
     println!("id author kz04px");
     println!("uciok");
 
