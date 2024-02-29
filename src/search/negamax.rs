@@ -1,7 +1,7 @@
 use crate::chess::{mv::Mv, position::Position};
 use crate::search::stats::Stats;
 
-const INF: i32 = 10_000_000;
+pub const INF: i32 = 10_000_000;
 const MATE_SCORE: i32 = 1_000_000;
 const DRAW_SCORE: i32 = -50;
 
@@ -31,8 +31,14 @@ pub fn negamax(
     history: &mut Vec<u64>,
     stats: &mut Stats,
     should_stop: &impl Fn(&Stats) -> bool,
+    mut alpha: i32,
+    beta: i32,
     depth: i32,
 ) -> i32 {
+    debug_assert!(-INF <= alpha);
+    debug_assert!(alpha < beta);
+    debug_assert!(beta <= INF);
+
     if depth <= 0 {
         return eval(pos);
     }
@@ -58,12 +64,20 @@ pub fn negamax(
         let npos = pos.after_move::<true>(&mv);
         history.push(npos.hash);
 
-        let score = -negamax(&npos, history, stats, should_stop, depth - 1);
+        let score = -negamax(&npos, history, stats, should_stop, -beta, -alpha, depth - 1);
         history.pop();
 
         if score > best_score {
             best_score = score;
             best_move = Some(mv);
+        }
+
+        if score > alpha {
+            alpha = score;
+        }
+
+        if alpha >= beta {
+            break;
         }
     }
 

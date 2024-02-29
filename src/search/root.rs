@@ -1,4 +1,5 @@
 use self::info::Info;
+use self::negamax::INF;
 use self::stats::Stats;
 use crate::chess::colour::Colour;
 use crate::chess::{mv::Mv, position::Position};
@@ -38,7 +39,7 @@ pub fn root(
     for depth in 1..MAX_DEPTH {
         stats.depth = depth;
 
-        let score = negamax::negamax(&pos, history, &mut stats, &should_stop, depth);
+        let score = negamax::negamax(&pos, history, &mut stats, &should_stop, -INF, INF, depth);
         let elapsed = start.elapsed();
 
         if stats.best_move.is_none() {
