@@ -1,0 +1,16 @@
+[package]
+name = "rawr"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rand = "0.8.4"
+
+[profile.release]
+opt-level = 3
+codegen-units = 1
+lto = true
+overflow-checks = false
+strip = "debuginfo"
