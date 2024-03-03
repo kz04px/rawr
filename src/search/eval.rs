@@ -1,7 +1,7 @@
-use crate::chess::position::Position;
+use crate::chess::{bitboard::Bitboard, position::Position};
 
 const PIECE_VALUES: [i32; 6] = [100, 300, 325, 500, 900, 0];
-
+const PASSED_PAWNS: [i32; 8] = [0, 10, 20, 30, 40, 60, 90, 0];
 #[rustfmt::skip]
 const PST: [[i32; 64]; 6] = [
     [
@@ -62,8 +62,27 @@ const PST: [[i32; 64]; 6] = [
 ];
 
 #[must_use]
+fn get_passed_pawns(us: Bitboard, them: Bitboard) -> Bitboard {
+    let mut mask = them.south() | them.south_east() | them.south_west();
+    mask |= mask.south();
+    mask |= mask.south();
+    mask |= mask.south();
+    mask |= mask.south();
+    us & !mask
+}
+
+#[must_use]
 pub fn eval_us(pos: &Position) -> i32 {
     let mut score = 0;
+    let pawns_us = pos.get_pawns() & pos.get_us();
+    let pawns_them = pos.get_pawns() & pos.get_them();
+
+    // Passed pawns
+    let passed_pawns = get_passed_pawns(pawns_us, pawns_them);
+    for sq in passed_pawns {
+        let rank = sq.rank();
+        score += PASSED_PAWNS[rank as usize];
+    }
 
     for i in 0..6 {
         // Material
@@ -84,4 +103,58 @@ pub fn eval(pos: &Position) -> i32 {
     score += eval_us(pos);
     score -= eval_us(&Position::from_flipped(pos));
     score
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::chess::bitboard::Bitboard;
+
+    #[test]
+    fn test_passers() {
+        assert_eq!(
+            get_passed_pawns(Bitboard::empty(), Bitboard::empty()),
+            Bitboard::empty()
+        );
+        assert_eq!(
+            get_passed_pawns(Bitboard(0xff00), Bitboard::empty()),
+            Bitboard(0xff00)
+        );
+        assert_eq!(
+            get_passed_pawns(Bitboard(0xff000000000000), Bitboard::empty()),
+            Bitboard(0xff000000000000)
+        );
+        assert_eq!(
+            get_passed_pawns(Bitboard(0xff00), Bitboard(0xff0000000000)),
+            Bitboard::empty()
+        );
+        assert_eq!(
+            get_passed_pawns(Bitboard(0xff000000000000), Bitboard(0xff0000000000)),
+            Bitboard(0xff000000000000)
+        );
+        assert_eq!(
+            get_passed_pawns(Bitboard(0x10000000), Bitboard(0xef100000)),
+            Bitboard(0x10000000)
+        );
+        assert_eq!(
+            get_passed_pawns(Bitboard(0x8100), Bitboard(0x81000000000000)),
+            Bitboard::empty()
+        );
+        assert_eq!(
+            get_passed_pawns(Bitboard(0x8100), Bitboard(0x42000000000000)),
+            Bitboard::empty()
+        );
+        assert_eq!(
+            get_passed_pawns(Bitboard(0x8100), Bitboard(0x3c000000000000)),
+            Bitboard(0x8100)
+        );
+        assert_eq!(
+            get_passed_pawns(Bitboard(0xaa000000000000), Bitboard(0x55000000000000)),
+            Bitboard(0xaa000000000000)
+        );
+        assert_eq!(
+            get_passed_pawns(Bitboard(0x55000000000000), Bitboard(0xaa000000000000)),
+            Bitboard(0x55000000000000)
+        );
+    }
 }
