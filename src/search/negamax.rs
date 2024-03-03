@@ -6,6 +6,42 @@ pub const INF: i32 = 10_000_000;
 const MATE_SCORE: i32 = 1_000_000;
 const DRAW_SCORE: i32 = -50;
 
+fn sort(pos: &Position, moves: &mut Vec<Mv>) {
+    let piece_values = [100, 300, 325, 500, 900, 0];
+    let mut scores = [0; 218];
+
+    if moves.len() < 2 {
+        return;
+    }
+
+    // Score
+    for i in 0..moves.len() {
+        let captured = pos.get_piece_on(moves[i].to);
+        let piece = pos.get_piece_on(moves[i].from);
+
+        if let Some(captured) = captured {
+            scores[i] =
+                10 * piece_values[captured as usize] - piece_values[piece.unwrap() as usize];
+        } else {
+            scores[i] = 0;
+        }
+    }
+
+    // Sort
+    for i in 0..moves.len() - 1 {
+        let mut best = i;
+
+        for j in i + 1..moves.len() {
+            if scores[j] > scores[best] {
+                best = j;
+            }
+        }
+
+        (moves[i], moves[best]) = (moves[best], moves[i]);
+        (scores[i], scores[best]) = (scores[best], scores[i]);
+    }
+}
+
 #[must_use]
 pub fn negamax(
     pos: &Position,
@@ -40,7 +76,10 @@ pub fn negamax(
         return DRAW_SCORE;
     }
 
-    for mv in pos.legal_moves() {
+    let mut moves = pos.legal_moves();
+    sort(&pos, &mut moves);
+
+    for mv in moves {
         stats.nodes += 1;
         let npos = pos.after_move::<true>(&mv);
         history.push(npos.hash);
