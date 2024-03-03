@@ -1,8 +1,9 @@
+use crate::search::eval::eval;
 use crate::uci::{go, position};
 use crate::{chess::position::Position, uci::moves};
 
 pub fn listen() {
-    println!("id name Rawr 0.8.0");
+    println!("id name Rawr 0.8.1");
     println!("id author kz04px");
     println!("uciok");
 
@@ -29,6 +30,8 @@ pub fn listen() {
             "go" => go::go(&mut stream, &mut pos, &mut history),
             "position" => position::position(&mut stream, &mut pos, &mut history),
             "moves" => moves::moves(&mut stream, &mut pos, &mut history),
+            "history" => history.iter().for_each(|hash| println!("{:#x}", hash)),
+            "eval" => println!("{}", eval(&pos)),
             "quit" => break,
             _ => {}
         }
