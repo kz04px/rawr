@@ -51,13 +51,20 @@ pub fn negamax(
     mut alpha: i32,
     beta: i32,
     ply: i32,
-    depth: i32,
+    mut depth: i32,
 ) -> i32 {
     debug_assert!(-INF <= alpha);
     debug_assert!(alpha < beta);
     debug_assert!(beta <= INF);
 
     stats.seldepth = std::cmp::max(stats.seldepth, ply);
+
+    let in_check = pos.in_check();
+
+    // Check extensions
+    if in_check {
+        depth += 1;
+    }
 
     if depth <= 0 {
         return qsearch(pos, stats, alpha, beta, ply);
@@ -114,7 +121,7 @@ pub fn negamax(
     }
 
     if best_move.is_none() {
-        if pos.in_check() {
+        if in_check {
             return -MATE_SCORE + ply;
         } else {
             return DRAW_SCORE;
