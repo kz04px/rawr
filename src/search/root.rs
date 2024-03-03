@@ -39,7 +39,7 @@ pub fn root(
     for depth in 1..MAX_DEPTH {
         stats.depth = depth;
 
-        let score = negamax::negamax(&pos, history, &mut stats, &should_stop, -INF, INF, depth);
+        let score = negamax::negamax(&pos, history, &mut stats, &should_stop, -INF, INF, 0, depth);
         let elapsed = start.elapsed();
 
         if stats.best_move.is_none() {
