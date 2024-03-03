@@ -287,3 +287,41 @@ Aggression value 0.174 weight 4.0 weighted 0.698 contribution 10.41% name Rook/Q
 Aggression value 0.093 weight 4.0 weighted 0.370 contribution 5.52% name Bishop/Queen threats on king
 - Aggressive   0.333
 ```
+
+---
+
+## v0.9.0
+Adjust mate scores by depth from root.
+
+Match results:
+```
+1+0.01s:
+    Score of Rawr-0.9.0 vs Rawr-0.8.0: 368 - 334 - 298  [0.517] 1000
+    Elo difference: 11.8 +/- 18.0, LOS: 90.0 %, DrawRatio: 29.8 %
+10+0.1s:
+    Score of Rawr-0.9.0 vs Rawr-0.8.0: 231 - 233 - 136  [0.498] 600
+    Elo difference: -1.2 +/- 24.5, LOS: 46.3 %, DrawRatio: 22.7 %
+```
+Style script:
+```
+Filter: All games
+Score:
+- games    500
+- wins     183 (36.60%)
+- draws    121 (24.20%)
+- losses   196 (39.20%)
+Styles:
+Aggression value 0.304 weight 4.0 weighted 1.215 contribution 16.52% name Game length
+Aggression value 0.423 weight 2.0 weighted 0.846 contribution 11.51% name Capture early
+Aggression value 0.224 weight 4.0 weighted 0.895 contribution 12.18% name Capture near king
+Aggression value 0.105 weight 2.0 weighted 0.210 contribution 2.86% name Move near king
+Aggression value 0.119 weight 0.2 weighted 0.024 contribution 0.32% name Castle opposite
+Aggression value 0.033 weight 1.0 weighted 0.033 contribution 0.45% name Push pawns
+Aggression value 0.081 weight 5.0 weighted 0.404 contribution 5.50% name Checks
+Aggression value 0.011 weight 5.0 weighted 0.055 contribution 0.74% name Win while behind
+Aggression value 0.161 weight 5.0 weighted 0.804 contribution 10.94% name Capture frequency
+Aggression value 0.442 weight 4.0 weighted 1.769 contribution 24.07% name Push pawns towards king
+Aggression value 0.175 weight 4.0 weighted 0.698 contribution 9.50% name Rook/Queen threats on king
+Aggression value 0.100 weight 4.0 weighted 0.399 contribution 5.42% name Bishop/Queen threats on king
+- Aggressive   0.366
+```

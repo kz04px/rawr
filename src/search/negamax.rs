@@ -115,7 +115,7 @@ pub fn negamax(
 
     if best_move.is_none() {
         if pos.in_check() {
-            return -MATE_SCORE;
+            return -MATE_SCORE + ply;
         } else {
             return DRAW_SCORE;
         }

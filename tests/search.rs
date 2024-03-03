@@ -17,6 +17,8 @@ mod tests {
             ("8/8/8/8/Q7/6k1/4r3/6K1 b - - 0 1", "e2e1"),
             ("6k1/8/6K1/q3R3/8/8/8/8 w - - 0 1", "e5e8"),
             ("8/8/8/8/Q3r3/6k1/8/6K1 b - - 0 1", "e4e1"),
+            ("k7/6R1/5R1P/8/8/8/8/K7 w - - 0 1", "f6f8"),
+            ("k7/8/8/8/8/5r1p/6r1/K7 b - - 0 1", "f3f1"),
         ];
 
         let should_stop = |_stats: &Stats| false;
@@ -33,7 +35,7 @@ mod tests {
                 -INF,
                 INF,
                 0,
-                2,
+                4,
             );
             assert!(!pos.in_check());
             assert!(stats.best_move.is_some());
@@ -67,7 +69,7 @@ mod tests {
                 -INF,
                 INF,
                 0,
-                2,
+                4,
             );
             assert!(!pos.in_check());
             assert!(stats.best_move.is_some());
