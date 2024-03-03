@@ -1,3 +1,4 @@
+use crate::chess::mv::Mv;
 use crate::chess::position::Position;
 
 impl Position {
@@ -11,8 +12,8 @@ impl Position {
 
         let mut nodes = 0u64;
 
-        self.move_generator(|mv| {
-            let npos = self.after_move::<false>(&mv);
+        self.move_generator(|_piece, from, to, promo| {
+            let npos = self.after_move::<false>(&Mv { from, to, promo });
             nodes += npos.perft(depth - 1)
         });
 

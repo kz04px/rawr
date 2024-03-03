@@ -8,6 +8,7 @@ pub mod count_moves;
 pub mod flip;
 pub mod from_fen;
 pub mod get_fen;
+pub mod legal_captures;
 pub mod legal_moves;
 pub mod magic;
 pub mod makemove;

@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use rawr::chess::position::Position;
+    use rawr::chess::{mv::Mv, position::Position};
 
     #[test]
     fn zobrist() {
@@ -35,7 +35,8 @@ mod tests {
             println!("{fen}");
             let pos = Position::from_fen(&fen.to_owned().to_string());
 
-            pos.move_generator(|mv| {
+            pos.move_generator(|_piece, from, to, promo| {
+                let mv = Mv { from, to, promo };
                 let predicted = pos.predict_hash(&mv);
                 let npos = pos.after_move::<true>(&mv);
                 println!("- {}", mv.to_uci(&pos));
