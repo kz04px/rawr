@@ -1,5 +1,5 @@
 use crate::chess::{mv::Mv, position::Position};
-use crate::search::eval::eval;
+use crate::search::qsearch::qsearch;
 use crate::search::stats::Stats;
 
 pub const INF: i32 = 10_000_000;
@@ -60,7 +60,7 @@ pub fn negamax(
     stats.seldepth = std::cmp::max(stats.seldepth, ply);
 
     if depth <= 0 {
-        return eval(pos);
+        return qsearch(pos, stats, alpha, beta, ply);
     }
 
     if should_stop(stats) {
