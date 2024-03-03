@@ -6,8 +6,8 @@ impl Position {
     pub fn legal_moves(&self) -> Vec<Mv> {
         let mut movelist = Vec::with_capacity(128);
 
-        self.move_generator(|mv| {
-            movelist.push(mv);
+        self.move_generator(|_piece, from, to, promo| {
+            movelist.push(Mv { from, to, promo });
         });
 
         movelist

@@ -1,6 +1,5 @@
 use crate::chess::attacks::is_safe;
 use crate::chess::bitboard::Bitboard;
-use crate::chess::mv::Mv;
 use crate::chess::piece::Piece;
 use crate::chess::position::Position;
 use crate::chess::side::Side;
@@ -9,7 +8,7 @@ use crate::chess::square::*;
 use crate::chess::{magic, rays};
 
 impl Position {
-    pub fn move_generator(&self, mut func: impl FnMut(Mv)) {
+    pub fn move_generator(&self, mut func: impl FnMut(Piece, Square, Square, Piece)) {
         let ksq = (self.get_kings() & self.get_us()).lsb();
 
         let mut ray_ne = Bitboard::empty();
@@ -196,32 +195,12 @@ impl Position {
             & allowed
         {
             if to.rank() == 7 {
-                func(Mv {
-                    from: Square(to.0 - 8),
-                    to,
-                    promo: Piece::Queen,
-                });
-                func(Mv {
-                    from: Square(to.0 - 8),
-                    to,
-                    promo: Piece::Rook,
-                });
-                func(Mv {
-                    from: Square(to.0 - 8),
-                    to,
-                    promo: Piece::Bishop,
-                });
-                func(Mv {
-                    from: Square(to.0 - 8),
-                    to,
-                    promo: Piece::Knight,
-                });
+                func(Piece::Pawn, Square(to.0 - 8), to, Piece::Queen);
+                func(Piece::Pawn, Square(to.0 - 8), to, Piece::Rook);
+                func(Piece::Pawn, Square(to.0 - 8), to, Piece::Bishop);
+                func(Piece::Pawn, Square(to.0 - 8), to, Piece::Knight);
             } else {
-                func(Mv {
-                    from: Square(to.0 - 8),
-                    to,
-                    promo: Piece::None,
-                });
+                func(Piece::Pawn, Square(to.0 - 8), to, Piece::None);
             }
         }
 
@@ -232,11 +211,7 @@ impl Position {
             & Bitboard(0xFF000000)
             & allowed
         {
-            func(Mv {
-                from: Square(to.0 - 16),
-                to,
-                promo: Piece::None,
-            });
+            func(Piece::Pawn, Square(to.0 - 16), to, Piece::None);
         }
 
         // Pawns -- capture NE
@@ -247,32 +222,12 @@ impl Position {
             & allowed
         {
             if to.rank() == 7 {
-                func(Mv {
-                    from: Square(to.0 - 9),
-                    to,
-                    promo: Piece::Queen,
-                });
-                func(Mv {
-                    from: Square(to.0 - 9),
-                    to,
-                    promo: Piece::Rook,
-                });
-                func(Mv {
-                    from: Square(to.0 - 9),
-                    to,
-                    promo: Piece::Bishop,
-                });
-                func(Mv {
-                    from: Square(to.0 - 9),
-                    to,
-                    promo: Piece::Knight,
-                });
+                func(Piece::Pawn, Square(to.0 - 9), to, Piece::Queen);
+                func(Piece::Pawn, Square(to.0 - 9), to, Piece::Rook);
+                func(Piece::Pawn, Square(to.0 - 9), to, Piece::Bishop);
+                func(Piece::Pawn, Square(to.0 - 9), to, Piece::Knight);
             } else {
-                func(Mv {
-                    from: Square(to.0 - 9),
-                    to,
-                    promo: Piece::None,
-                });
+                func(Piece::Pawn, Square(to.0 - 9), to, Piece::None);
             }
         }
 
@@ -283,32 +238,12 @@ impl Position {
             & allowed
         {
             if to.rank() == 7 {
-                func(Mv {
-                    from: Square(to.0 - 7),
-                    to,
-                    promo: Piece::Queen,
-                });
-                func(Mv {
-                    from: Square(to.0 - 7),
-                    to,
-                    promo: Piece::Rook,
-                });
-                func(Mv {
-                    from: Square(to.0 - 7),
-                    to,
-                    promo: Piece::Bishop,
-                });
-                func(Mv {
-                    from: Square(to.0 - 7),
-                    to,
-                    promo: Piece::Knight,
-                });
+                func(Piece::Pawn, Square(to.0 - 7), to, Piece::Queen);
+                func(Piece::Pawn, Square(to.0 - 7), to, Piece::Rook);
+                func(Piece::Pawn, Square(to.0 - 7), to, Piece::Bishop);
+                func(Piece::Pawn, Square(to.0 - 7), to, Piece::Knight);
             } else {
-                func(Mv {
-                    from: Square(to.0 - 7),
-                    to,
-                    promo: Piece::None,
-                });
+                func(Piece::Pawn, Square(to.0 - 7), to, Piece::None);
             }
         }
 
@@ -330,11 +265,7 @@ impl Position {
                     && ((rays::ray_e(ksq, blockers) & rq).is_empty()
                         && (rays::ray_w(ksq, blockers) & rq).is_empty())
                 {
-                    func(Mv {
-                        from: Square(ep.0 - 9),
-                        to: ep,
-                        promo: Piece::None,
-                    });
+                    func(Piece::Pawn, Square(ep.0 - 9), ep, Piece::None);
                 }
             }
 
@@ -352,11 +283,7 @@ impl Position {
                     && ((rays::ray_e(ksq, blockers) & rq).is_empty()
                         && (rays::ray_w(ksq, blockers) & rq).is_empty())
                 {
-                    func(Mv {
-                        from: Square(ep.0 - 7),
-                        to: ep,
-                        promo: Piece::None,
-                    });
+                    func(Piece::Pawn, Square(ep.0 - 7), ep, Piece::None);
                 }
             }
         }
@@ -364,11 +291,7 @@ impl Position {
         // Knights
         for from in self.get_knights() & self.get_us() & !pinned {
             for to in rays::knights(Bitboard::from_square(from)) & allowed {
-                func(Mv {
-                    from,
-                    to,
-                    promo: Piece::None,
-                });
+                func(Piece::Knight, from, to, Piece::None);
             }
         }
 
@@ -376,22 +299,14 @@ impl Position {
         for from in self.get_bishops() & self.get_us() & bpinned {
             let mask = magic::bishop_moves(from.0 as i32, self.get_occupied().0);
             for to in mask & allowed & bxrays {
-                func(Mv {
-                    from,
-                    to,
-                    promo: Piece::None,
-                });
+                func(Piece::Bishop, from, to, Piece::None);
             }
         }
         // Bishops - not pinned
         for from in self.get_bishops() & self.get_us() & !pinned {
             let mask = magic::bishop_moves(from.0 as i32, self.get_occupied().0);
             for to in mask & allowed {
-                func(Mv {
-                    from,
-                    to,
-                    promo: Piece::None,
-                });
+                func(Piece::Bishop, from, to, Piece::None);
             }
         }
 
@@ -399,22 +314,14 @@ impl Position {
         for from in self.get_rooks() & self.get_us() & rpinned {
             let mask = magic::rook_moves(from.0 as i32, self.get_occupied().0);
             for to in mask & allowed & rxrays {
-                func(Mv {
-                    from,
-                    to,
-                    promo: Piece::None,
-                });
+                func(Piece::Rook, from, to, Piece::None);
             }
         }
         // Rooks - not pinned
         for from in self.get_rooks() & self.get_us() & !pinned {
             let mask = magic::rook_moves(from.0 as i32, self.get_occupied().0);
             for to in mask & allowed {
-                func(Mv {
-                    from,
-                    to,
-                    promo: Piece::None,
-                });
+                func(Piece::Rook, from, to, Piece::None);
             }
         }
 
@@ -422,33 +329,21 @@ impl Position {
         for from in self.get_queens() & self.get_us() & bpinned {
             let mask = magic::bishop_moves(from.0 as i32, self.get_occupied().0);
             for to in mask & allowed & bxrays {
-                func(Mv {
-                    from,
-                    to,
-                    promo: Piece::None,
-                });
+                func(Piece::Queen, from, to, Piece::None);
             }
         }
         // Queens - rook pinned
         for from in self.get_queens() & self.get_us() & rpinned {
             let mask = magic::rook_moves(from.0 as i32, self.get_occupied().0);
             for to in mask & allowed & rxrays {
-                func(Mv {
-                    from,
-                    to,
-                    promo: Piece::None,
-                });
+                func(Piece::Queen, from, to, Piece::None);
             }
         }
         // Queens - not pinned
         for from in self.get_queens() & self.get_us() & !pinned {
             let mask = magic::queen_moves(from.0 as i32, self.get_occupied().0);
             for to in mask & allowed {
-                func(Mv {
-                    from,
-                    to,
-                    promo: Piece::None,
-                });
+                func(Piece::Queen, from, to, Piece::None);
             }
         }
 
@@ -466,11 +361,7 @@ impl Position {
                     self.get_them() & self.get_queens(),
                     self.get_them() & self.get_kings(),
                 ) {
-                    func(Mv {
-                        from,
-                        to,
-                        promo: Piece::None,
-                    });
+                    func(Piece::King, from, to, Piece::None);
                 }
             }
         }
@@ -481,11 +372,7 @@ impl Position {
             && (self.get_occupied() & Bitboard(0x60)).is_empty()
             && !self.is_bb_attacked(Bitboard(0x60), Side::Them)
         {
-            func(Mv {
-                from: ksq,
-                to: G1,
-                promo: Piece::None,
-            });
+            func(Piece::King, ksq, G1, Piece::None);
         }
 
         // Queen side castling
@@ -494,11 +381,7 @@ impl Position {
             && (self.get_occupied() & Bitboard(0xe)).is_empty()
             && !self.is_bb_attacked(Bitboard(0xc), Side::Them)
         {
-            func(Mv {
-                from: ksq,
-                to: C1,
-                promo: Piece::None,
-            });
+            func(Piece::King, ksq, C1, Piece::None);
         }
     }
 }
