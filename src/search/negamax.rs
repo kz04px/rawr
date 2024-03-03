@@ -50,11 +50,14 @@ pub fn negamax(
     should_stop: &impl Fn(&Stats) -> bool,
     mut alpha: i32,
     beta: i32,
+    ply: i32,
     depth: i32,
 ) -> i32 {
     debug_assert!(-INF <= alpha);
     debug_assert!(alpha < beta);
     debug_assert!(beta <= INF);
+
+    stats.seldepth = std::cmp::max(stats.seldepth, ply);
 
     if depth <= 0 {
         return eval(pos);
@@ -84,7 +87,16 @@ pub fn negamax(
         let npos = pos.after_move::<true>(&mv);
         history.push(npos.hash);
 
-        let score = -negamax(&npos, history, stats, should_stop, -beta, -alpha, depth - 1);
+        let score = -negamax(
+            &npos,
+            history,
+            stats,
+            should_stop,
+            -beta,
+            -alpha,
+            ply + 1,
+            depth - 1,
+        );
         history.pop();
 
         if score > best_score {

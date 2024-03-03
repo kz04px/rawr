@@ -25,7 +25,16 @@ mod tests {
             let pos = Position::from_fen(fen);
             let mut history = vec![];
             let mut stats = Stats::default();
-            let _ = negamax::negamax(&pos, &mut history, &mut stats, &should_stop, -INF, INF, 2);
+            let _ = negamax::negamax(
+                &pos,
+                &mut history,
+                &mut stats,
+                &should_stop,
+                -INF,
+                INF,
+                0,
+                2,
+            );
             assert!(!pos.in_check());
             assert!(stats.best_move.is_some());
             assert_eq!(movestr, stats.best_move.unwrap().to_uci(&pos));
@@ -50,7 +59,16 @@ mod tests {
             let pos = Position::from_fen(fen);
             let mut history = vec![];
             let mut stats = Stats::default();
-            let _ = negamax::negamax(&pos, &mut history, &mut stats, &should_stop, -INF, INF, 2);
+            let _ = negamax::negamax(
+                &pos,
+                &mut history,
+                &mut stats,
+                &should_stop,
+                -INF,
+                INF,
+                0,
+                2,
+            );
             assert!(!pos.in_check());
             assert!(stats.best_move.is_some());
             assert_eq!(movestr, stats.best_move.unwrap().to_uci(&pos));
