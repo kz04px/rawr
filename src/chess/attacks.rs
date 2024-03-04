@@ -32,7 +32,7 @@ pub fn is_safe(
         return false;
     }
     // King
-    else if (rays::adjacent(sq) & kings).is_occupied() {
+    else if (Bitboard::from_square(sq).adjacent() & kings).is_occupied() {
         return false;
     }
     // None
@@ -75,7 +75,7 @@ impl Position {
             return true;
         }
         // King
-        else if rays::adjacent(ksq).is_set(sq) {
+        else if Bitboard::from_square(ksq).adjacent().is_set(sq) {
             return true;
         }
         // None
@@ -101,7 +101,7 @@ impl Position {
             return true;
         }
         // King
-        else if (rays::adjacent_bb(bb) & self.get_kings() & self.get_side(side)).is_occupied() {
+        else if (bb.adjacent() & self.get_kings() & self.get_side(side)).is_occupied() {
             return true;
         }
 
@@ -135,7 +135,7 @@ impl Position {
         attacked |= mask & rays::knights(self.get_knights() & self.get_side(side));
 
         // King
-        attacked |= mask & rays::adjacent_bb(self.get_kings() & self.get_side(side));
+        attacked |= mask & (self.get_kings() & self.get_side(side)).adjacent();
 
         let bq = self.get_side(side) & (self.get_bishops() | self.get_queens());
         let rq = self.get_side(side) & (self.get_rooks() | self.get_queens());
