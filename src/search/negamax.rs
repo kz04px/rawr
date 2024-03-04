@@ -60,6 +60,7 @@ pub fn negamax(
     stats.seldepth = std::cmp::max(stats.seldepth, ply);
 
     let in_check = pos.in_check();
+    let is_root = ply == 0;
 
     // Check extensions
     if in_check {
@@ -79,8 +80,12 @@ pub fn negamax(
     let is_50move = pos.halfmoves >= 100;
     let is_threefold = history
         .iter()
-        .fold(0, |acc, hash| if *hash == pos.hash { acc + 1 } else { acc })
-        >= 3;
+        .rev()
+        .take(pos.halfmoves as usize)
+        .step_by(2)
+        .filter(|hash| **hash == pos.hash)
+        .count()
+        >= if is_root { 3 } else { 2 };
 
     if is_50move || is_threefold {
         return DRAW_SCORE;
