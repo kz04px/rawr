@@ -350,7 +350,7 @@ impl Position {
         // King
         for from in self.get_kings() & self.get_us() {
             let kbb = Bitboard::from_square(from);
-            for to in rays::adjacent(from) & !self.get_us() {
+            for to in Bitboard::from_square(from).adjacent() & !self.get_us() {
                 if is_safe(
                     to,
                     self.get_occupied() ^ kbb,

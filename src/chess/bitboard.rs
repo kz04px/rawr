@@ -115,6 +115,20 @@ impl Bitboard {
     pub fn lsb(self) -> Square {
         Square(self.0.trailing_zeros() as u8)
     }
+
+    #[must_use]
+    pub fn adjacent(self) -> Self {
+        Bitboard(
+            // North
+            (self.0 << 8) |
+            // South
+            (self.0 >> 8) |
+            // north west, south west, west
+            (((self.0 << 7) | (self.0 >> 9) | (self.0 >> 1)) & 0x7f7f7f7f7f7f7f7f) |
+            // north east, south east, east
+            (((self.0 >> 7) | (self.0 << 9) | (self.0 << 1)) & 0xfefefefefefefefe),
+        )
+    }
 }
 
 impl BitAnd for Bitboard {
@@ -264,5 +278,26 @@ mod tests {
     fn west() {
         assert_eq!(Bitboard(0x0).west(), Bitboard(0x0));
         assert_eq!(Bitboard(0x1).west(), Bitboard(0x0));
+    }
+
+    #[test]
+    fn adjacent() {
+        assert_eq!(Bitboard(0x0).adjacent(), Bitboard(0x0));
+        assert_eq!(Bitboard(0x1).adjacent(), Bitboard(0x302));
+        assert_eq!(Bitboard(0x80).adjacent(), Bitboard(0xc040));
+        assert_eq!(
+            Bitboard(0x8000000000000000).adjacent(),
+            Bitboard(0x40c0000000000000)
+        );
+        assert_eq!(
+            Bitboard(0x100000000000000).adjacent(),
+            Bitboard(0x203000000000000)
+        );
+        assert_eq!(
+            Bitboard(0x42000000004200).adjacent(),
+            Bitboard(0xe7a5e70000e7a5e7)
+        );
+        assert_eq!(Bitboard(0x18000000).adjacent(), Bitboard(0x3c3c3c0000));
+        assert_eq!(Bitboard(0x14000000).adjacent(), Bitboard(0x3e2a3e0000));
     }
 }

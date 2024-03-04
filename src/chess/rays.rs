@@ -122,26 +122,6 @@ pub fn ray_w(sq: Square, blockers: Bitboard) -> Bitboard {
 }
 
 #[must_use]
-pub fn adjacent(sq: Square) -> Bitboard {
-    let bb = Bitboard::from_square(sq);
-    adjacent_bb(bb)
-}
-
-#[must_use]
-pub fn adjacent_bb(bb: Bitboard) -> Bitboard {
-    Bitboard(
-        // North
-        (bb.0 << 8) |
-            // South
-            (bb.0 >> 8) |
-            // north west, south west, west
-            (((bb.0 << 7) | (bb.0 >> 9) | (bb.0 >> 1)) & 0x7f7f7f7f7f7f7f7f) |
-            // north east, south east, east
-            (((bb.0 >> 7) | (bb.0 << 9) | (bb.0 << 1)) & 0xfefefefefefefefe),
-    )
-}
-
-#[must_use]
 pub fn knights(bb: Bitboard) -> Bitboard {
     bb.north().north_east()
         | bb.north().north_west()
