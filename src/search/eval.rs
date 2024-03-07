@@ -1,4 +1,4 @@
-use crate::chess::{bitboard::Bitboard, position::Position};
+use crate::chess::{bitboard::Bitboard, position::Position, square::Square};
 
 use super::score::Score;
 
@@ -21,6 +21,7 @@ const PASSED_PAWNS: [Score; 8] = [
     Score(0, 0),
 ];
 const ROOK_OPEN_FILE: Score = Score(25, 25);
+const KING_PAWN_SHIELD: Score = Score(20, 0);
 #[rustfmt::skip]
 const PST: [[Score; 64]; 6] = [[
     Score(0, 0),     Score(0, 0),     Score(0, 0),     Score(0, 0),     Score(0, 0),     Score(0, 0),     Score(0, 0),     Score(0, 0),     
@@ -110,6 +111,17 @@ fn get_open_files(pawns: Bitboard) -> Bitboard {
 }
 
 #[must_use]
+fn get_king_shield(ksq: Square) -> Bitboard {
+    let bb = Bitboard::from_square(ksq);
+    bb.north()
+        | bb.north_east()
+        | bb.north_west()
+        | bb.north().north()
+        | bb.north().north_east()
+        | bb.north().north_west()
+}
+
+#[must_use]
 fn get_phase(pos: &Position) -> i32 {
     let phase = 24
         - pos.get_knights().count()
@@ -128,6 +140,7 @@ fn taper(score: &Score, phase: i32) -> i32 {
 #[must_use]
 pub fn eval_us(pos: &Position) -> Score {
     let mut score = Score::default();
+    let ksq = (pos.get_kings() & pos.get_us()).lsb();
     let pawns_us = pos.get_pawns() & pos.get_us();
     let pawns_them = pos.get_pawns() & pos.get_them();
     let open_files = get_open_files(pos.get_pawns());
@@ -138,6 +151,9 @@ pub fn eval_us(pos: &Position) -> Score {
         let rank = sq.rank();
         score += PASSED_PAWNS[rank as usize];
     }
+
+    // King pawn shield
+    score += KING_PAWN_SHIELD * (get_king_shield(ksq) & pawns_us).count();
 
     // Rooks on open files
     score += ROOK_OPEN_FILE * (open_files & pos.get_us() & pos.get_rooks()).count();
@@ -166,7 +182,7 @@ pub fn eval(pos: &Position) -> i32 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::chess::bitboard::Bitboard;
+    use crate::chess::{bitboard::Bitboard, square::*};
 
     #[test]
     fn test_passers() {
@@ -228,5 +244,12 @@ mod tests {
             get_open_files(Bitboard(0x90000010000201)),
             Bitboard(0x6c6c6c6c6c6c6c6c)
         );
+    }
+
+    #[test]
+    fn test_king_shield() {
+        assert_eq!(get_king_shield(E4), Bitboard(0x383800000000));
+        assert_eq!(get_king_shield(A1), Bitboard(0x30300));
+        assert_eq!(get_king_shield(H1), Bitboard(0xc0c000));
     }
 }
