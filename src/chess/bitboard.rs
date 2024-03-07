@@ -22,6 +22,11 @@ impl Bitboard {
     }
 
     #[must_use]
+    pub fn from_adj_files(sq: Square) -> Self {
+        Self::from_file(sq).east() | Self::from_file(sq).west()
+    }
+
+    #[must_use]
     pub const fn from_rank(sq: Square) -> Self {
         Self(0xffu64 << (8 * sq.rank()))
     }
@@ -227,6 +232,13 @@ mod tests {
     fn file_rank() {
         assert!(Bitboard::from_file(E4) == Bitboard(0x1010101010101010));
         assert!(Bitboard::from_rank(E4) == Bitboard(0xff000000));
+    }
+
+    #[test]
+    fn adj_files() {
+        assert!(Bitboard::from_adj_files(E4) == Bitboard(0x2828282828282828));
+        assert!(Bitboard::from_adj_files(A1) == Bitboard(0x202020202020202));
+        assert!(Bitboard::from_adj_files(H1) == Bitboard(0x4040404040404040));
     }
 
     #[test]
