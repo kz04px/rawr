@@ -1,6 +1,8 @@
+use self::hashtable::Hashtable;
 use self::info::Info;
 use self::negamax::INF;
 use self::stats::Stats;
+use self::ttentry::TTEntry;
 use crate::chess::colour::Colour;
 use crate::chess::{mv::Mv, position::Position};
 use crate::search::*;
@@ -12,6 +14,7 @@ const MAX_DEPTH: i32 = 128;
 pub fn root(
     pos: Position,
     history: &mut Vec<u64>,
+    tt: &mut Hashtable<TTEntry>,
     settings: settings::Type,
     info_printer: fn(&Info),
 ) -> Result<Mv, &'static str> {
@@ -39,7 +42,17 @@ pub fn root(
     for depth in 1..MAX_DEPTH {
         stats.depth = depth;
 
-        let score = negamax::negamax(&pos, history, &mut stats, &should_stop, -INF, INF, 0, depth);
+        let score = negamax::negamax(
+            &pos,
+            history,
+            tt,
+            &mut stats,
+            &should_stop,
+            -INF,
+            INF,
+            0,
+            depth,
+        );
         let elapsed = start.elapsed();
 
         if stats.best_move.is_none() {
@@ -60,6 +73,7 @@ pub fn root(
             score: Some(score),
             mate: None,
             elapsed: Some(elapsed.as_millis()),
+            hashfull: tt.hashfull(),
             pv,
         });
 

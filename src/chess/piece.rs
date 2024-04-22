@@ -1,7 +1,8 @@
 use std::fmt;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 pub enum Piece {
+    #[default]
     Pawn = 0,
     Knight,
     Bishop,

@@ -8,5 +8,6 @@ pub struct Info {
     pub score: Option<i32>,
     pub mate: Option<i32>,
     pub elapsed: Option<u128>,
+    pub hashfull: Option<i32>,
     pub pv: Vec<Mv>,
 }

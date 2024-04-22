@@ -4,4 +4,5 @@ pub mod moves;
 pub mod mv;
 pub mod perft;
 pub mod position;
+pub mod setoption;
 pub mod split;

@@ -1,7 +1,7 @@
 use crate::chess::piece::Piece;
 use crate::chess::square::Square;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 pub struct Mv {
     pub from: Square,
     pub to: Square,

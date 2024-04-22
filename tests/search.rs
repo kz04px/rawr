@@ -3,8 +3,10 @@ mod tests {
     use rawr::{
         chess::position::Position,
         search::{
+            hashtable::Hashtable,
             negamax::{self, INF},
             stats::Stats,
+            ttentry::TTEntry,
         },
     };
 
@@ -21,6 +23,7 @@ mod tests {
             ("k7/8/8/8/8/5r1p/6r1/K7 b - - 0 1", "f3f1"),
         ];
 
+        let mut tt = Hashtable::<TTEntry>::new(16);
         let should_stop = |_stats: &Stats| false;
 
         for (fen, movestr) in tests {
@@ -30,6 +33,7 @@ mod tests {
             let _ = negamax::negamax(
                 &pos,
                 &mut history,
+                &mut tt,
                 &mut stats,
                 &should_stop,
                 -INF,
@@ -54,6 +58,7 @@ mod tests {
             ("4k3/8/8/2p5/1N1P4/8/8/4K3 b - - 0 1", "c5b4"),
         ];
 
+        let mut tt = Hashtable::<TTEntry>::new(16);
         let should_stop = |_stats: &Stats| false;
 
         for (fen, movestr) in tests {
@@ -64,6 +69,7 @@ mod tests {
             let _ = negamax::negamax(
                 &pos,
                 &mut history,
+                &mut tt,
                 &mut stats,
                 &should_stop,
                 -INF,
@@ -84,6 +90,7 @@ mod tests {
             ("k7/2Q5/ppp5/8/8/8/2qq4/7K w - - 0 1", "c7c8"),
         ];
 
+        let mut tt = Hashtable::<TTEntry>::new(16);
         let should_stop = |_stats: &Stats| false;
 
         for (fen, movestr) in tests {
@@ -94,6 +101,7 @@ mod tests {
             let _ = negamax::negamax(
                 &pos,
                 &mut history,
+                &mut tt,
                 &mut stats,
                 &should_stop,
                 -INF,
@@ -118,6 +126,7 @@ mod tests {
             // ("4K3/p7/8/8/8/r7/1r6/7k b - - 99 1", "a3a1"),
         ];
 
+        let mut tt = Hashtable::<TTEntry>::new(16);
         let should_stop = |_stats: &Stats| false;
 
         for (fen, movestr) in tests {
@@ -128,6 +137,7 @@ mod tests {
             let _ = negamax::negamax(
                 &pos,
                 &mut history,
+                &mut tt,
                 &mut stats,
                 &should_stop,
                 -INF,
@@ -148,6 +158,7 @@ mod tests {
             ("q6k/8/6Q1/6Q1/6Q1/8/P7/K5Q1 b - - 0 1", "a8a2"),
         ];
 
+        let mut tt = Hashtable::<TTEntry>::new(16);
         let should_stop = |_stats: &Stats| false;
 
         for (fen, movestr) in tests {
@@ -158,6 +169,7 @@ mod tests {
             let _ = negamax::negamax(
                 &pos,
                 &mut history,
+                &mut tt,
                 &mut stats,
                 &should_stop,
                 -INF,
@@ -178,6 +190,7 @@ mod tests {
             ("8/2n5/1b6/8/4b1k1/8/5p1K/8 b - - 0 1", "f2f1n"),
         ];
 
+        let mut tt = Hashtable::<TTEntry>::new(16);
         let should_stop = |_stats: &Stats| false;
 
         for (fen, movestr) in tests {
@@ -188,6 +201,7 @@ mod tests {
             let _ = negamax::negamax(
                 &pos,
                 &mut history,
+                &mut tt,
                 &mut stats,
                 &should_stop,
                 -INF,

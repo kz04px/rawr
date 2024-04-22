@@ -1,9 +1,11 @@
 use super::perft;
 use super::split;
 use crate::chess::position::Position;
+use crate::search::hashtable::Hashtable;
 use crate::search::info::Info;
 use crate::search::root;
 use crate::search::settings;
+use crate::search::ttentry::TTEntry;
 use std::str::SplitAsciiWhitespace;
 
 fn info_printer(info: &Info) {
@@ -30,6 +32,9 @@ fn info_printer(info: &Info) {
         if t > 0 {
             print!(" nps {}", (n as u128 * 1000) / t);
         }
+    }
+    if let Some(hashfull) = info.hashfull {
+        print!(" hashfull {hashfull}");
     }
     if !info.pv.is_empty() {
         print!(" pv");
@@ -89,7 +94,12 @@ pub fn parse_go(stream: &mut SplitAsciiWhitespace) -> Result<settings::Type, &'s
     }
 }
 
-pub fn go(stream: &mut SplitAsciiWhitespace, pos: &mut Position, history: &mut Vec<u64>) {
+pub fn go(
+    stream: &mut SplitAsciiWhitespace,
+    pos: &mut Position,
+    history: &mut Vec<u64>,
+    tt: &mut Hashtable<TTEntry>,
+) {
     let opts = parse_go(stream);
     if opts.is_err() {
         return;
@@ -101,7 +111,7 @@ pub fn go(stream: &mut SplitAsciiWhitespace, pos: &mut Position, history: &mut V
         | settings::Type::Nodes(_)
         | settings::Type::Movetime(_)
         | settings::Type::Infinite => {
-            let bestmove = root::root(*pos, history, opts.unwrap(), info_printer);
+            let bestmove = root::root(*pos, history, tt, opts.unwrap(), info_printer);
             match bestmove {
                 Ok(mv) => println!("bestmove {}", mv.to_uci(pos)),
                 Err(_) => println!("bestmove 0000"),

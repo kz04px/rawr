@@ -1,12 +1,15 @@
 use crate::chess::{mv::Mv, position::Position};
+use crate::search::hashtable::Hashtable;
 use crate::search::qsearch::qsearch;
 use crate::search::stats::Stats;
+use crate::search::ttentry::Flag;
+use crate::search::ttentry::TTEntry;
 
 pub const INF: i32 = 10_000_000;
 const MATE_SCORE: i32 = 1_000_000;
 const DRAW_SCORE: i32 = -50;
 
-fn sort(pos: &Position, moves: &mut Vec<Mv>) {
+fn sort(pos: &Position, moves: &mut Vec<Mv>, ttmove: &Option<Mv>) {
     let piece_values = [100, 300, 325, 500, 900, 0];
     let mut scores = [0; 218];
 
@@ -19,7 +22,9 @@ fn sort(pos: &Position, moves: &mut Vec<Mv>) {
         let captured = pos.get_piece_on(moves[i].to);
         let piece = pos.get_piece_on(moves[i].from);
 
-        if let Some(captured) = captured {
+        if ttmove.is_some() && ttmove.unwrap() == moves[i] {
+            scores[i] = 1_000_000;
+        } else if let Some(captured) = captured {
             scores[i] =
                 10 * piece_values[captured as usize] - piece_values[piece.unwrap() as usize];
         } else {
@@ -46,6 +51,7 @@ fn sort(pos: &Position, moves: &mut Vec<Mv>) {
 pub fn negamax(
     pos: &Position,
     history: &mut Vec<u64>,
+    tt: &mut Hashtable<TTEntry>,
     stats: &mut Stats,
     should_stop: &impl Fn(&Stats) -> bool,
     mut alpha: i32,
@@ -57,14 +63,22 @@ pub fn negamax(
     debug_assert!(alpha < beta);
     debug_assert!(beta <= INF);
 
-    stats.seldepth = std::cmp::max(stats.seldepth, ply);
-
+    let alpha_orig = alpha;
     let in_check = pos.in_check();
     let is_root = ply == 0;
+
+    stats.seldepth = std::cmp::max(stats.seldepth, ply);
 
     // Check extensions
     if in_check {
         depth += 1;
+    }
+
+    // Poll the TT
+    let ttentry = tt.poll(pos.hash);
+    let mut ttmove = None;
+    if ttentry.hash == pos.hash {
+        ttmove = Some(ttentry.mv);
     }
 
     if depth <= 0 {
@@ -92,7 +106,7 @@ pub fn negamax(
     }
 
     let mut moves = pos.legal_moves();
-    sort(&pos, &mut moves);
+    sort(&pos, &mut moves, &ttmove);
 
     for mv in moves {
         stats.nodes += 1;
@@ -102,6 +116,7 @@ pub fn negamax(
         let score = -negamax(
             &npos,
             history,
+            tt,
             stats,
             should_stop,
             -beta,
@@ -137,6 +152,25 @@ pub fn negamax(
     debug_assert!(best_score > -INF);
     debug_assert!(best_score >= -MATE_SCORE);
 
+    // Create TT entry
+    let flag = if best_score <= alpha_orig {
+        Flag::Upper
+    } else if best_score >= beta {
+        Flag::Lower
+    } else {
+        Flag::Exact
+    };
+    let new_entry = TTEntry {
+        hash: pos.hash,
+        mv: best_move.unwrap(),
+        score: best_score,
+        depth,
+        flag,
+    };
+    tt.add(pos.hash, &new_entry);
+    debug_assert_eq!(new_entry, tt.poll(pos.hash));
+
+    // Update PV
     stats.best_move = best_move;
 
     best_score
