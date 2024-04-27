@@ -19,6 +19,10 @@ impl Position {
         (self.us_ksc, self.them_ksc) = (self.them_ksc, self.us_ksc);
         (self.us_qsc, self.them_qsc) = (self.them_qsc, self.us_qsc);
 
+        // Swap castling files
+        (self.castle_files[0], self.castle_files[2]) = (self.castle_files[2], self.castle_files[0]);
+        (self.castle_files[1], self.castle_files[3]) = (self.castle_files[3], self.castle_files[1]);
+
         if self.ep.is_some() {
             self.ep = Some(self.ep.unwrap().flip());
         }

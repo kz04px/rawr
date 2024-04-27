@@ -1,11 +1,20 @@
 use crate::chess::attacks::is_safe;
 use crate::chess::bitboard::Bitboard;
+use crate::chess::magic;
 use crate::chess::piece::Piece;
 use crate::chess::position::Position;
+use crate::chess::rays;
 use crate::chess::side::Side;
 use crate::chess::square::Square;
 use crate::chess::square::*;
-use crate::chess::{magic, rays};
+
+#[must_use]
+fn line_between(sq1: Square, sq2: Square) -> Bitboard {
+    ((Bitboard((1u64 << sq1.0) - 1) ^ Bitboard((1u64 << sq2.0) - 1))
+        & !Bitboard::from_square(sq1)
+        & !Bitboard::from_square(sq2))
+        | Bitboard::from_square(sq2)
+}
 
 impl Position {
     pub fn move_generator(&self, mut func: impl FnMut(Piece, Square, Square, Piece)) {
@@ -366,22 +375,42 @@ impl Position {
             }
         }
 
+        let ksc_sq = Square::from_coords(self.castle_files[0], 0);
+        let ksc_king_path = line_between(ksq, G1);
+        let ksc_rook_path = line_between(ksc_sq, F1);
+        let ksc_both_path = ksc_king_path | ksc_rook_path;
+
+        let qsc_sq = Square::from_coords(self.castle_files[1], 0);
+        let qsc_king_path = line_between(ksq, C1);
+        let qsc_rook_path = line_between(qsc_sq, D1);
+        let qsc_both_path = qsc_king_path | qsc_rook_path;
+
         // King side castling
         if self.us_ksc
             && !in_check
-            && (self.get_occupied() & Bitboard(0x60)).is_empty()
-            && !self.is_bb_attacked(Bitboard(0x60), Side::Them)
+            && !hpinned.is_set(ksc_sq)
+            && (self.get_occupied()
+                & ksc_both_path
+                & !Bitboard::from_square(ksq)
+                & !Bitboard::from_square(ksc_sq))
+            .is_empty()
+            && !self.is_bb_attacked(ksc_king_path, Side::Them)
         {
-            func(Piece::King, ksq, G1, Piece::None);
+            func(Piece::King, ksq, ksc_sq, Piece::None);
         }
 
         // Queen side castling
         if self.us_qsc
             && !in_check
-            && (self.get_occupied() & Bitboard(0xe)).is_empty()
-            && !self.is_bb_attacked(Bitboard(0xc), Side::Them)
+            && !hpinned.is_set(qsc_sq)
+            && (self.get_occupied()
+                & qsc_both_path
+                & !Bitboard::from_square(ksq)
+                & !Bitboard::from_square(qsc_sq))
+            .is_empty()
+            && !self.is_bb_attacked(qsc_king_path, Side::Them)
         {
-            func(Piece::King, ksq, C1, Piece::None);
+            func(Piece::King, ksq, qsc_sq, Piece::None);
         }
     }
 }

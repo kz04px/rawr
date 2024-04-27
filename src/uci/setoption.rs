@@ -1,6 +1,6 @@
 use std::str::SplitAsciiWhitespace;
 
-pub fn setoption(stream: &mut SplitAsciiWhitespace, mut func_hash: impl FnMut(usize)) {
+pub fn setoption(stream: &mut SplitAsciiWhitespace, mut func: impl FnMut(&str, &str)) {
     match stream.next() {
         Some("name") => {}
         _ => return,
@@ -15,15 +15,9 @@ pub fn setoption(stream: &mut SplitAsciiWhitespace, mut func_hash: impl FnMut(us
 
     let value = stream.next();
 
-    if name.is_none() || value.is_none() {
-        return;
-    }
-
-    match (name.unwrap(), value.unwrap()) {
-        ("Hash" | "hash", v) => {
-            if let Ok(size) = v.parse::<usize>() {
-                func_hash(size);
-            }
+    match (name, value) {
+        (Some(name), Some(value)) => {
+            func(name, value);
         }
         _ => {}
     }

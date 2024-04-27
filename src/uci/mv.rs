@@ -1,18 +1,42 @@
-use crate::chess::{colour::Colour, mv::Mv, piece::Piece, position::Position};
+use crate::chess::{
+    colour::Colour,
+    mv::Mv,
+    piece::Piece,
+    position::Position,
+    square::{C1, G1},
+};
 
 impl Mv {
     #[must_use]
     pub fn to_uci(&self, pos: &Position) -> String {
         let mut movestr = String::from("");
 
-        if pos.turn == Colour::Black {
-            movestr += &self.from.flip().to_string();
-            movestr += &self.to.flip().to_string();
+        let from = if pos.turn == Colour::White {
+            self.from
         } else {
-            movestr += &self.from.to_string();
-            movestr += &self.to.to_string();
-        }
+            self.from.flip()
+        };
 
+        let to = {
+            let sq = if !pos.is_frc && pos.get_us().is_set(self.to) {
+                if self.to.file() > self.from.file() {
+                    G1
+                } else {
+                    C1
+                }
+            } else {
+                self.to
+            };
+
+            if pos.turn == Colour::White {
+                sq
+            } else {
+                sq.flip()
+            }
+        };
+
+        movestr += &from.to_string();
+        movestr += &to.to_string();
         movestr += match self.promo {
             Piece::Knight => "n",
             Piece::Bishop => "b",

@@ -12,7 +12,28 @@ impl Position {
             return;
         }
 
-        *self = Position::default();
+        *self = Position {
+            colours: [Bitboard(0x0), Bitboard(0x0)],
+            pieces: [
+                Bitboard(0x0),
+                Bitboard(0x0),
+                Bitboard(0x0),
+                Bitboard(0x0),
+                Bitboard(0x0),
+                Bitboard(0x0),
+            ],
+            halfmoves: 0,
+            fullmoves: 1,
+            turn: Colour::White,
+            ep: None,
+            us_ksc: false,
+            us_qsc: false,
+            them_ksc: false,
+            them_qsc: false,
+            castle_files: [7, 0, 7, 0],
+            hash: 0u64,
+            is_frc: self.is_frc,
+        };
 
         let mut parts = fen.split(' ');
 
@@ -115,12 +136,64 @@ impl Position {
         // Castling permissions
         if let Some(part) = parts.next() {
             for c in part.chars() {
-                match c {
-                    'K' => self.us_ksc = true,
-                    'Q' => self.us_qsc = true,
-                    'k' => self.them_ksc = true,
-                    'q' => self.them_qsc = true,
-                    _ => {}
+                let (side, file, is_ksc) = match c {
+                    'K' => {
+                        let file = (self.get_white() & self.get_rooks() & Bitboard(0xFF))
+                            .hsb()
+                            .file() as u8;
+                        (Colour::White, file, true)
+                    }
+                    'Q' => {
+                        let file = (self.get_white() & self.get_rooks() & Bitboard(0xFF))
+                            .lsb()
+                            .file() as u8;
+                        (Colour::White, file, false)
+                    }
+                    'k' => {
+                        let file =
+                            (self.get_black() & self.get_rooks() & Bitboard(0xFF00000000000000))
+                                .hsb()
+                                .file() as u8;
+                        (Colour::Black, file, true)
+                    }
+                    'q' => {
+                        let file =
+                            (self.get_black() & self.get_rooks() & Bitboard(0xFF00000000000000))
+                                .lsb()
+                                .file() as u8;
+                        (Colour::Black, file, false)
+                    }
+                    'A'..='H' => {
+                        let ksq = (self.get_kings() & self.get_us()).lsb();
+                        let file = c as u8 - 'A' as u8;
+                        (Colour::White, file, (file > ksq.file() as u8))
+                    }
+                    'a'..='h' => {
+                        let ksq = (self.get_kings() & self.get_them()).lsb();
+                        let file = c as u8 - 'a' as u8;
+                        (Colour::Black, file, (file > ksq.file() as u8))
+                    }
+                    '-' => break,
+                    _ => panic!("Uh oh"),
+                };
+
+                match (side, is_ksc) {
+                    (Colour::White, true) => {
+                        self.us_ksc = true;
+                        self.castle_files[0] = file;
+                    }
+                    (Colour::White, false) => {
+                        self.us_qsc = true;
+                        self.castle_files[1] = file;
+                    }
+                    (Colour::Black, true) => {
+                        self.them_ksc = true;
+                        self.castle_files[2] = file;
+                    }
+                    (Colour::Black, false) => {
+                        self.them_qsc = true;
+                        self.castle_files[3] = file;
+                    }
                 }
             }
         }

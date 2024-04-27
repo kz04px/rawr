@@ -4,7 +4,7 @@ mod tests {
 
     #[test]
     fn perft_enpassant() {
-        let tests: Vec<(&str, Vec<u64>)> = vec![
+        let tests = [
             // EP
             ("8/8/8/8/1k1PpN1R/8/8/4K3 b - d3 0 1", vec![1, 9, 193]),
             ("8/8/8/8/1k1Ppn1R/8/8/4K3 b - d3 0 1", vec![1, 17, 220]),
@@ -63,9 +63,9 @@ mod tests {
 
     #[test]
     fn perft_double_checked() {
-        let tests: Vec<(&str, Vec<u64>)> = vec![
-            ("4k3/8/4r3/8/8/8/3p4/4K3 w - - 0 1", vec![1, 4, 80, 320]),
-            ("4k3/8/4q3/8/8/8/3b4/4K3 w - - 0 1", vec![1, 4, 143, 496]),
+        let tests = [
+            ("4k3/8/4r3/8/8/8/3p4/4K3 w - - 0 1", [1, 4, 80, 320]),
+            ("4k3/8/4q3/8/8/8/3b4/4K3 w - - 0 1", [1, 4, 143, 496]),
         ];
 
         for (fen, results) in tests {
@@ -80,16 +80,39 @@ mod tests {
 
     #[test]
     fn perft_pins() {
-        let tests: Vec<(&str, Vec<u64>)> = vec![
-            ("4k3/8/8/8/1b5b/8/3Q4/4K3 w - - 0 1", vec![1, 3, 54, 1256]),
-            ("4k3/8/8/8/1b5b/8/3R4/4K3 w - - 0 1", vec![1, 3, 54, 836]),
-            ("4k3/8/8/8/1b5b/2Q5/5P2/4K3 w - - 0 1", vec![1, 6, 98, 2274]),
-            ("4k3/8/8/8/1b5b/2R5/5P2/4K3 w - - 0 1", vec![1, 4, 72, 1300]),
-            ("4k3/8/8/8/1b2r3/8/3Q4/4K3 w - - 0 1", vec![1, 3, 66, 1390]),
+        let tests = [
+            ("4k3/8/8/8/1b5b/8/3Q4/4K3 w - - 0 1", [1, 3, 54, 1256]),
+            ("4k3/8/8/8/1b5b/8/3R4/4K3 w - - 0 1", [1, 3, 54, 836]),
+            ("4k3/8/8/8/1b5b/2Q5/5P2/4K3 w - - 0 1", [1, 6, 98, 2274]),
+            ("4k3/8/8/8/1b5b/2R5/5P2/4K3 w - - 0 1", [1, 4, 72, 1300]),
+            ("4k3/8/8/8/1b2r3/8/3Q4/4K3 w - - 0 1", [1, 3, 66, 1390]),
+            ("4k3/8/8/8/1b2r3/8/3QP3/4K3 w - - 0 1", [1, 6, 119, 2074]),
+        ];
+
+        for (fen, results) in tests {
+            println!("{fen}");
+            let pos = Position::from_fen(fen);
+            for (idx, result) in results.iter().enumerate() {
+                let nodes = pos.perft(idx as u8);
+                assert_eq!(nodes, *result);
+            }
+        }
+    }
+
+    #[test]
+    fn perft_dfrc() {
+        let tests = [
             (
-                "4k3/8/8/8/1b2r3/8/3QP3/4K3 w - - 0 1",
-                vec![1, 6, 119, 2074],
+                "2r1kr2/8/8/8/8/8/8/1R2K1R1 w GBfc - 0 1",
+                [1, 22, 501, 11459],
             ),
+            ("rkr5/8/8/8/8/8/8/5RKR w HFca - 0 1", [1, 22, 442, 10217]),
+            ("5rkr/8/8/8/8/8/8/RKR5 w CAhf - 0 1", [1, 22, 442, 10206]),
+            ("3rkr2/8/8/8/8/8/8/R3K2R w HAfd - 0 1", [1, 20, 452, 9873]),
+            ("4k3/8/8/8/8/8/8/4KR2 w F - 0 1", [1, 14, 47, 781]),
+            ("4kr2/8/8/8/8/8/8/4K3 w f - 0 1", [1, 3, 42, 246]),
+            ("4k3/8/8/8/8/8/8/2R1K3 w C - 0 1", [1, 16, 71, 1277]),
+            ("2r1k3/8/8/8/8/8/8/4K3 w c - 0 1", [1, 5, 80, 448]),
         ];
 
         for (fen, results) in tests {

@@ -122,6 +122,11 @@ impl Bitboard {
     }
 
     #[must_use]
+    pub fn hsb(self) -> Square {
+        Square(63 - self.0.leading_zeros() as u8)
+    }
+
+    #[must_use]
     pub fn adjacent(self) -> Self {
         Bitboard(
             // North
@@ -311,5 +316,29 @@ mod tests {
         );
         assert_eq!(Bitboard(0x18000000).adjacent(), Bitboard(0x3c3c3c0000));
         assert_eq!(Bitboard(0x14000000).adjacent(), Bitboard(0x3e2a3e0000));
+    }
+
+    #[test]
+    fn set_bits() {
+        assert_eq!(Bitboard(0x1).lsb(), Square::from_coords(0, 0));
+        assert_eq!(Bitboard(0x1).hsb(), Square::from_coords(0, 0));
+        assert_eq!(Bitboard(0x10000000).lsb(), Square::from_coords(4, 3));
+        assert_eq!(Bitboard(0x10000000).hsb(), Square::from_coords(4, 3));
+        assert_eq!(
+            Bitboard(0x8000000000000000).lsb(),
+            Square::from_coords(7, 7)
+        );
+        assert_eq!(
+            Bitboard(0x8000000000000000).hsb(),
+            Square::from_coords(7, 7)
+        );
+        assert_eq!(
+            Bitboard(0x8100000000000081).lsb(),
+            Square::from_coords(0, 0)
+        );
+        assert_eq!(
+            Bitboard(0x8100000000000081).hsb(),
+            Square::from_coords(7, 7)
+        );
     }
 }

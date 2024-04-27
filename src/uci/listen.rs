@@ -6,12 +6,14 @@ use crate::{chess::position::Position, uci::moves};
 
 pub fn listen() {
     let mut hash = 16;
+    let mut is_frc = false;
 
     println!(
         "id name Rawr {}",
         option_env!("CARGO_PKG_VERSION").unwrap_or("unknown")
     );
     println!("id author kz04px");
+    println!("option name UCI_Chess960 type check default {}", is_frc);
     println!("option name Hash type spin default {hash} min 1 max 4096");
     println!("uciok");
 
@@ -35,8 +37,17 @@ pub fn listen() {
                 got_isready = true;
                 break;
             }
-            "setoption" => setoption::setoption(&mut stream, |size| {
-                hash = size.clamp(1, 4096);
+            "setoption" => setoption::setoption(&mut stream, |name, value| match name {
+                "Hash" | "hash" => {
+                    if let Ok(size) = value.parse::<usize>() {
+                        hash = size.clamp(1, 4096);
+                    }
+                }
+                "UCI_Chess960" => {
+                    is_frc = value == "true";
+                    pos.is_frc = is_frc;
+                }
+                _ => {}
             }),
             "quit" => return,
             _ => {
@@ -65,6 +76,7 @@ pub fn listen() {
         match stream.next().unwrap_or("") {
             "ucinewgame" => {
                 pos = Position::startpos();
+                pos.is_frc = is_frc;
                 history.clear();
                 history.push(pos.hash);
                 tt.clear();
@@ -72,11 +84,23 @@ pub fn listen() {
             "isready" => println!("readyok"),
             "print" | "display" | "board" => print!("{pos}"),
             "go" => go::go(&mut stream, &mut pos, &mut history, &mut tt),
-            "position" => position::position(&mut stream, &mut pos, &mut history),
+            "position" => {
+                position::position(&mut stream, &mut pos, &mut history);
+                pos.is_frc = is_frc;
+            }
             "moves" => moves::moves(&mut stream, &mut pos, &mut history),
-            "setoption" => setoption::setoption(&mut stream, |size| {
-                hash = size.clamp(1, 4096);
-                tt.resize(hash);
+            "setoption" => setoption::setoption(&mut stream, |name, value| match name {
+                "Hash" | "hash" => {
+                    if let Ok(size) = value.parse::<usize>() {
+                        hash = size.clamp(1, 4096);
+                        tt.resize(hash);
+                    }
+                }
+                "UCI_Chess960" => {
+                    is_frc = value == "true";
+                    pos.is_frc = is_frc;
+                }
+                _ => {}
             }),
             "history" => history.iter().for_each(|hash| println!("{:#x}", hash)),
             "eval" => println!("{}", eval(&pos)),

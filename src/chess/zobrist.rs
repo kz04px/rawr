@@ -817,8 +817,8 @@ impl Position {
         hash ^= KEYS[get_index(self.turn, piece.unwrap(), to)];
 
         // Capture
-        if let Some(cap) = captured {
-            hash ^= KEYS[get_index(!self.turn, cap, to)];
+        if self.get_them().is_set(mv.to) {
+            hash ^= KEYS[get_index(!self.turn, captured.unwrap(), to)];
         }
 
         // En passant - unset
@@ -837,13 +837,27 @@ impl Position {
             hash ^= KEYS_EP[mv.to.file() as usize];
         }
 
+        let ksc_sq = Square::from_coords(self.castle_files[0], 0);
+        let qsc_sq = Square::from_coords(self.castle_files[1], 0);
+
         // King side castle
-        if piece.unwrap() == Piece::King && mv.from == E1 && mv.to == G1 {
-            // hash ^= KEYS_CASTLING[2 * self.turn as usize + 0];
+        if piece.unwrap() == Piece::King && self.us_ksc && mv.to == ksc_sq {
+            hash ^= KEYS[get_index(self.turn, Piece::King, from)];
+            hash ^= KEYS[get_index(self.turn, Piece::King, to)];
+
+            // King
+            hash ^= KEYS[get_index(self.turn, Piece::King, from)];
+            hash ^= KEYS[get_index(
+                self.turn,
+                Piece::King,
+                G1.maybe_flip(self.turn == Colour::Black),
+            )];
+
+            // Rook
             hash ^= KEYS[get_index(
                 self.turn,
                 Piece::Rook,
-                H1.maybe_flip(self.turn == Colour::Black),
+                ksc_sq.maybe_flip(self.turn == Colour::Black),
             )];
             hash ^= KEYS[get_index(
                 self.turn,
@@ -852,12 +866,23 @@ impl Position {
             )];
         }
         // Queen side castle
-        else if piece.unwrap() == Piece::King && mv.from == E1 && mv.to == C1 {
-            // hash ^= KEYS_CASTLING[2 * self.turn as usize + 1];
+        else if piece.unwrap() == Piece::King && self.us_qsc && mv.to == qsc_sq {
+            hash ^= KEYS[get_index(self.turn, Piece::King, from)];
+            hash ^= KEYS[get_index(self.turn, Piece::King, to)];
+
+            // King
+            hash ^= KEYS[get_index(self.turn, Piece::King, from)];
+            hash ^= KEYS[get_index(
+                self.turn,
+                Piece::King,
+                C1.maybe_flip(self.turn == Colour::Black),
+            )];
+
+            // Rook
             hash ^= KEYS[get_index(
                 self.turn,
                 Piece::Rook,
-                A1.maybe_flip(self.turn == Colour::Black),
+                qsc_sq.maybe_flip(self.turn == Colour::Black),
             )];
             hash ^= KEYS[get_index(
                 self.turn,
@@ -873,24 +898,24 @@ impl Position {
         }
 
         // Castling - us
-        if self.us_ksc && mv.from == H1 {
+        if self.us_ksc && mv.from == ksc_sq {
             hash ^= KEYS_CASTLING[2 * self.turn as usize];
         }
-        if self.us_qsc && mv.from == A1 {
+        if self.us_qsc && mv.from == qsc_sq {
             hash ^= KEYS_CASTLING[2 * self.turn as usize + 1];
         }
-        if self.us_ksc && mv.from == E1 {
+        if self.us_ksc && piece.unwrap() == Piece::King {
             hash ^= KEYS_CASTLING[2 * self.turn as usize];
         }
-        if self.us_qsc && mv.from == E1 {
+        if self.us_qsc && piece.unwrap() == Piece::King {
             hash ^= KEYS_CASTLING[2 * self.turn as usize + 1];
         }
 
         // Castling - them
-        if self.them_ksc && mv.to == H8 {
+        if self.them_ksc && mv.to == Square::from_coords(self.castle_files[2], 7) {
             hash ^= KEYS_CASTLING[2 * !self.turn as usize];
         }
-        if self.them_qsc && mv.to == A8 {
+        if self.them_qsc && mv.to == Square::from_coords(self.castle_files[3], 7) {
             hash ^= KEYS_CASTLING[2 * !self.turn as usize + 1];
         }
 

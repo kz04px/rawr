@@ -16,6 +16,13 @@ impl Position {
         let piece = self.get_piece_on(mv.from);
         let captured = self.get_piece_on(mv.to);
 
+        let ksq_us = (self.get_us() & self.get_kings()).lsb();
+        let ksq_them = (self.get_them() & self.get_kings()).lsb();
+        let ksc_us = Square::from_coords(self.castle_files[0], 0);
+        let qsc_us = Square::from_coords(self.castle_files[1], 0);
+        let ksc_them = Square::from_coords(self.castle_files[2], 7);
+        let qsc_them = Square::from_coords(self.castle_files[3], 7);
+
         debug_assert!(piece.is_some());
         debug_assert!(captured.unwrap_or(Piece::None) != Piece::King);
         debug_assert!(mv.promo != Piece::Pawn);
@@ -32,7 +39,7 @@ impl Position {
         self.halfmoves += 1;
 
         // Capture
-        if captured.is_some() {
+        if self.get_them().is_set(mv.to) {
             self.colours[Side::Them as usize] ^= bb_to;
             self.pieces[captured.unwrap() as usize] ^= bb_to;
             self.halfmoves = 0;
@@ -57,14 +64,46 @@ impl Position {
         }
 
         // King side castle
-        if piece.unwrap() == Piece::King && mv.from == E1 && mv.to == G1 {
-            self.colours[Side::Us as usize] ^= Bitboard(0xa0);
-            self.pieces[Piece::Rook as usize] ^= Bitboard(0xa0);
+        if (self.get_kings() & self.get_rooks()).is_occupied() && mv.to.0 > mv.from.0 {
+            debug_assert!(piece.unwrap() == Piece::King);
+            debug_assert!(captured.unwrap() == Piece::Rook);
+
+            let ksc_sq = Square::from_coords(self.castle_files[0], 0);
+            self.colours[Side::Us as usize] ^= bb_from | bb_to;
+            self.pieces[Piece::King as usize] ^= bb_from | bb_to;
+
+            // King
+            self.colours[Side::Us as usize] ^= Bitboard::from_square(mv.from);
+            self.colours[Side::Us as usize] ^= Bitboard::from_square(G1);
+            self.pieces[Piece::King as usize] ^= Bitboard::from_square(mv.from);
+            self.pieces[Piece::King as usize] ^= Bitboard::from_square(G1);
+
+            // Rook
+            self.colours[Side::Us as usize] ^= Bitboard::from_square(ksc_sq);
+            self.colours[Side::Us as usize] ^= Bitboard::from_square(F1);
+            self.pieces[Piece::Rook as usize] ^= Bitboard::from_square(ksc_sq);
+            self.pieces[Piece::Rook as usize] ^= Bitboard::from_square(F1);
         }
         // Queen side castle
-        else if piece.unwrap() == Piece::King && mv.from == E1 && mv.to == C1 {
-            self.colours[Side::Us as usize] ^= Bitboard(0x9);
-            self.pieces[Piece::Rook as usize] ^= Bitboard(0x9);
+        else if (self.get_kings() & self.get_rooks()).is_occupied() && mv.to.0 < mv.from.0 {
+            debug_assert!(piece.unwrap() == Piece::King);
+            debug_assert!(captured.unwrap() == Piece::Rook);
+
+            let qsc_sq = Square::from_coords(self.castle_files[1], 0);
+            self.colours[Side::Us as usize] ^= bb_from | bb_to;
+            self.pieces[Piece::King as usize] ^= bb_from | bb_to;
+
+            // King
+            self.colours[Side::Us as usize] ^= Bitboard::from_square(mv.from);
+            self.colours[Side::Us as usize] ^= Bitboard::from_square(C1);
+            self.pieces[Piece::King as usize] ^= Bitboard::from_square(mv.from);
+            self.pieces[Piece::King as usize] ^= Bitboard::from_square(C1);
+
+            // Rook
+            self.colours[Side::Us as usize] ^= Bitboard::from_square(qsc_sq);
+            self.colours[Side::Us as usize] ^= Bitboard::from_square(D1);
+            self.pieces[Piece::Rook as usize] ^= Bitboard::from_square(qsc_sq);
+            self.pieces[Piece::Rook as usize] ^= Bitboard::from_square(D1);
         }
 
         // Promo
@@ -74,10 +113,10 @@ impl Position {
         }
 
         // Castling permissions
-        self.us_ksc &= mv.from != E1 && mv.from != H1 && mv.to != H1;
-        self.us_qsc &= mv.from != E1 && mv.from != A1 && mv.to != A1;
-        self.them_ksc &= mv.from != E8 && mv.from != H8 && mv.to != H8;
-        self.them_qsc &= mv.from != E8 && mv.from != A8 && mv.to != A8;
+        self.us_ksc &= mv.from != ksq_us && mv.from != ksc_us && mv.to != ksc_us;
+        self.us_qsc &= mv.from != ksq_us && mv.from != qsc_us && mv.to != qsc_us;
+        self.them_ksc &= mv.from != ksq_them && mv.from != ksc_them && mv.to != ksc_them;
+        self.them_qsc &= mv.from != ksq_them && mv.from != qsc_them && mv.to != qsc_them;
 
         self.flip();
     }

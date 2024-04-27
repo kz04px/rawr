@@ -17,7 +17,9 @@ pub struct Position {
     pub us_qsc: bool,
     pub them_ksc: bool,
     pub them_qsc: bool,
+    pub castle_files: [u8; 4],
     pub hash: u64,
+    pub is_frc: bool,
 }
 
 impl Default for Position {
@@ -41,7 +43,9 @@ impl Default for Position {
             us_qsc: false,
             them_ksc: false,
             them_qsc: false,
+            castle_files: [7, 0, 7, 0],
             hash: 0u64,
+            is_frc: false,
         }
     }
 }
@@ -67,7 +71,9 @@ impl Position {
             us_qsc: true,
             them_ksc: true,
             them_qsc: true,
+            castle_files: [7, 0, 7, 0],
             hash: 0x3adfd94b38170629,
+            is_frc: false,
         }
     }
 
@@ -272,20 +278,21 @@ impl fmt::Display for Position {
         } else {
             write!(f, "Castling: ")?;
             if npos.us_ksc {
-                write!(f, "K")?;
+                write!(f, "{}", ('A' as u8 + self.castle_files[0]) as char)?;
             }
             if npos.us_qsc {
-                write!(f, "Q")?;
+                write!(f, "{}", ('A' as u8 + self.castle_files[1]) as char)?;
             }
             if npos.them_ksc {
-                write!(f, "k")?;
+                write!(f, "{}", ('a' as u8 + self.castle_files[2]) as char)?;
             }
             if npos.them_qsc {
-                write!(f, "q")?;
+                write!(f, "{}", ('a' as u8 + self.castle_files[3]) as char)?;
             }
             writeln!(f)?;
         }
         writeln!(f, "Hash: {:#x}", self.hash)?;
+        writeln!(f, "FRC: {}", self.is_frc)?;
 
         Ok(())
     }
