@@ -73,7 +73,6 @@ mod tests {
 
             for (idx, expected) in results.iter().enumerate() {
                 let nodes = ttperft(&pos, &mut tt, idx as i32 + 1);
-                // let nodes = pos.perft(idx as u8 + 1);
                 println!("depth {} nodes {}", idx + 1, nodes);
                 assert_eq!(nodes, *expected);
             }

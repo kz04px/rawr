@@ -53,7 +53,7 @@ mod tests {
 
         for (fen, results) in tests {
             println!("{fen}");
-            let pos = Position::from_fen(&fen.to_owned());
+            let pos = Position::from_fen(fen);
             for (idx, result) in results.iter().enumerate() {
                 let nodes = pos.perft(idx as u8);
                 assert_eq!(nodes, *result);
@@ -70,7 +70,7 @@ mod tests {
 
         for (fen, results) in tests {
             println!("{fen}");
-            let pos = Position::from_fen(&fen.to_owned());
+            let pos = Position::from_fen(fen);
             for (idx, result) in results.iter().enumerate() {
                 let nodes = pos.perft(idx as u8);
                 assert_eq!(nodes, *result);
@@ -94,7 +94,7 @@ mod tests {
 
         for (fen, results) in tests {
             println!("{fen}");
-            let pos = Position::from_fen(&fen.to_owned());
+            let pos = Position::from_fen(fen);
             for (idx, result) in results.iter().enumerate() {
                 let nodes = pos.perft(idx as u8);
                 assert_eq!(nodes, *result);

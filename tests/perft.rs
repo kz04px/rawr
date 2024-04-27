@@ -490,7 +490,7 @@ mod tests {
         println!("Depth: 1");
         for (fen, results) in TESTS {
             println!("-- {fen}");
-            let pos = Position::from_fen(&fen.to_owned());
+            let pos = Position::from_fen(fen);
             let nodes = pos.perft(1);
             assert_eq!(nodes, results[0]);
         }
@@ -501,7 +501,7 @@ mod tests {
         println!("Depth: 2");
         for (fen, results) in TESTS {
             println!("-- {fen}");
-            let pos = Position::from_fen(&fen.to_owned());
+            let pos = Position::from_fen(fen);
             let nodes = pos.perft(2);
             assert_eq!(nodes, results[1]);
         }
@@ -512,7 +512,7 @@ mod tests {
         println!("Depth: 3");
         for (fen, results) in TESTS {
             println!("-- {fen}");
-            let pos = Position::from_fen(&fen.to_owned());
+            let pos = Position::from_fen(fen);
             let nodes = pos.perft(3);
             assert_eq!(nodes, results[2]);
         }
@@ -523,7 +523,7 @@ mod tests {
         println!("Depth: 4");
         for (fen, results) in TESTS {
             println!("-- {fen}");
-            let pos = Position::from_fen(&fen.to_owned());
+            let pos = Position::from_fen(fen);
             let nodes = pos.perft(4);
             assert_eq!(nodes, results[3]);
         }
@@ -534,7 +534,7 @@ mod tests {
         println!("Depth: 5");
         for (fen, results) in TESTS {
             println!("-- {fen}");
-            let pos = Position::from_fen(&fen.to_owned());
+            let pos = Position::from_fen(fen);
             let nodes = pos.perft(5);
             assert_eq!(nodes, results[4]);
         }
@@ -545,7 +545,7 @@ mod tests {
         println!("Depth: 6");
         for (fen, results) in TESTS {
             println!("-- {fen}");
-            let pos = Position::from_fen(&fen.to_owned());
+            let pos = Position::from_fen(fen);
             let nodes = pos.perft(6);
             assert_eq!(nodes, results[5]);
         }

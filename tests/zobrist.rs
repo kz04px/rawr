@@ -33,7 +33,7 @@ mod tests {
 
         for fen in fens {
             println!("{fen}");
-            let pos = Position::from_fen(&fen.to_owned().to_string());
+            let pos = Position::from_fen(fen);
 
             pos.move_generator(|_piece, from, to, promo| {
                 let mv = Mv { from, to, promo };
@@ -92,8 +92,8 @@ mod tests {
 
         for (fen1, fen2) in fens {
             println!("{fen1} vs {fen2}");
-            let pos1 = Position::from_fen(&fen1.to_owned().to_string());
-            let pos2 = Position::from_fen(&fen2.to_owned().to_string());
+            let pos1 = Position::from_fen(fen1);
+            let pos2 = Position::from_fen(fen2);
 
             assert_ne!(pos1.hash, pos2.hash);
         }
@@ -114,8 +114,8 @@ mod tests {
 
         for (fen1, fen2) in fens {
             println!("{fen1} vs {fen2}");
-            let pos1 = Position::from_fen(&fen1.to_owned().to_string());
-            let pos2 = Position::from_fen(&fen2.to_owned().to_string());
+            let pos1 = Position::from_fen(fen1);
+            let pos2 = Position::from_fen(fen2);
 
             assert_eq!(pos1.hash, pos2.hash);
         }

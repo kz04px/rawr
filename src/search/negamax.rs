@@ -22,14 +22,13 @@ fn sort(pos: &Position, moves: &mut Vec<Mv>, ttmove: &Option<Mv>) {
         let captured = pos.get_piece_on(moves[i].to);
         let piece = pos.get_piece_on(moves[i].from);
 
-        if ttmove.is_some() && ttmove.unwrap() == moves[i] {
-            scores[i] = 1_000_000;
+        scores[i] = if ttmove.is_some() && ttmove.unwrap() == moves[i] {
+            1_000_000
         } else if let Some(captured) = captured {
-            scores[i] =
-                10 * piece_values[captured as usize] - piece_values[piece.unwrap() as usize];
+            10 * piece_values[captured as usize] - piece_values[piece.unwrap() as usize]
         } else {
-            scores[i] = 0;
-        }
+            0
+        };
     }
 
     // Sort
@@ -44,6 +43,11 @@ fn sort(pos: &Position, moves: &mut Vec<Mv>, ttmove: &Option<Mv>) {
 
         (moves[i], moves[best]) = (moves[best], moves[i]);
         (scores[i], scores[best]) = (scores[best], scores[i]);
+    }
+
+    #[cfg(debug_assertions)]
+    for i in 0..moves.len() - 1 {
+        debug_assert!(scores[i] >= scores[i + 1]);
     }
 }
 
