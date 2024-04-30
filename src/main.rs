@@ -1,3 +1,4 @@
+use rawr::benchmark;
 use rawr::uci;
 use std::io;
 
@@ -7,6 +8,7 @@ fn main() -> io::Result<()> {
 
     match input.trim() {
         "uci" => uci::listen::listen(),
+        "bench" | "benchmark" => benchmark::benchmark(),
         "about" => {
             println!(
                 "Rawr version {}",
