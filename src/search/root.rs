@@ -52,6 +52,7 @@ pub fn root(
             INF,
             0,
             depth,
+            false,
         );
         let elapsed = start.elapsed();
 

@@ -800,6 +800,16 @@ const fn get_index(colour: Colour, piece: Piece, sq: Square) -> usize {
     colour as usize * 6 * 64 + piece as usize * 64 + sq.0 as usize
 }
 
+#[must_use]
+pub fn ep_key(sq: Square) -> u64 {
+    KEYS_EP[sq.file() as usize]
+}
+
+#[must_use]
+pub fn turn_key() -> u64 {
+    KEYS_TURN
+}
+
 impl Position {
     #[must_use]
     pub fn predict_hash(&self, mv: &Mv) -> u64 {

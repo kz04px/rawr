@@ -119,5 +119,10 @@ impl Position {
         self.them_qsc &= mv.from != ksq_them && mv.from != qsc_them && mv.to != qsc_them;
 
         self.flip();
+
+        #[cfg(debug_assertions)]
+        if UPDATE_HASH {
+            debug_assert_eq!(self.hash, self.calculate_hash());
+        }
     }
 }

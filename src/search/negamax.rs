@@ -9,6 +9,12 @@ pub const INF: i32 = 10_000_000;
 const MATE_SCORE: i32 = 1_000_000;
 const DRAW_SCORE: i32 = -50;
 
+#[must_use]
+fn is_endgame(pos: &Position) -> bool {
+    let pieces = pos.get_knights() | pos.get_bishops() | pos.get_rooks() | pos.get_queens();
+    (pieces & pos.get_us()).count() <= 2
+}
+
 fn sort(pos: &Position, moves: &mut Vec<Mv>, ttmove: &Option<Mv>) {
     let piece_values = [100, 300, 325, 500, 900, 0];
     let mut scores = [0; 218];
@@ -62,10 +68,11 @@ pub fn negamax(
     beta: i32,
     ply: i32,
     mut depth: i32,
+    can_nullmove: bool,
 ) -> i32 {
-    debug_assert!(-INF <= alpha);
+    debug_assert!(-INF <= alpha && alpha < INF);
+    debug_assert!(-INF < beta && beta <= INF);
     debug_assert!(alpha < beta);
-    debug_assert!(beta <= INF);
 
     let alpha_orig = alpha;
     let in_check = pos.in_check();
@@ -109,10 +116,37 @@ pub fn negamax(
         return DRAW_SCORE;
     }
 
+    // Null move pruning
+    if !is_root && can_nullmove && depth > 2 && !in_check && !is_endgame(pos) {
+        let npos = pos.after_null();
+        history.push(npos.hash);
+
+        let score = -negamax(
+            &npos,
+            history,
+            tt,
+            stats,
+            should_stop,
+            -beta,
+            -beta + 1,
+            ply + 1,
+            depth - 1 - 2,
+            false,
+        );
+        history.pop();
+
+        debug_assert!(-INF < score && score < INF);
+        debug_assert!(-MATE_SCORE < score && score < MATE_SCORE);
+
+        if score >= beta {
+            return score;
+        }
+    }
+
     let mut moves = pos.legal_moves();
     sort(&pos, &mut moves, &ttmove);
 
-    for mv in moves {
+    for mv in &moves {
         stats.nodes += 1;
         let npos = pos.after_move::<true>(&mv);
         history.push(npos.hash);
@@ -127,12 +161,13 @@ pub fn negamax(
             -alpha,
             ply + 1,
             depth - 1,
+            true,
         );
         history.pop();
 
         if score > best_score {
             best_score = score;
-            best_move = Some(mv);
+            best_move = Some(*mv);
         }
 
         if score > alpha {
@@ -145,6 +180,9 @@ pub fn negamax(
     }
 
     if best_move.is_none() {
+        debug_assert!(moves.is_empty());
+        debug_assert!(best_score == -INF);
+
         if in_check {
             return -MATE_SCORE + ply;
         } else {
@@ -152,9 +190,11 @@ pub fn negamax(
         }
     }
 
+    debug_assert!(!moves.is_empty());
     debug_assert!(best_move.is_some());
-    debug_assert!(best_score > -INF);
-    debug_assert!(best_score >= -MATE_SCORE);
+    debug_assert!(alpha_orig <= alpha);
+    debug_assert!(-INF < best_score && best_score < INF);
+    debug_assert!(-MATE_SCORE < best_score && best_score < MATE_SCORE);
 
     // Create TT entry
     let flag = if best_score <= alpha_orig {

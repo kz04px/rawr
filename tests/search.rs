@@ -40,6 +40,7 @@ mod tests {
                 INF,
                 0,
                 4,
+                false,
             );
             assert!(!pos.in_check());
             assert!(stats.best_move.is_some());
@@ -76,6 +77,7 @@ mod tests {
                 INF,
                 0,
                 4,
+                false,
             );
             assert!(!pos.in_check());
             assert!(stats.best_move.is_some());
@@ -108,6 +110,7 @@ mod tests {
                 INF,
                 0,
                 4,
+                false,
             );
             assert!(!pos.in_check());
             assert!(stats.best_move.is_some());
@@ -144,6 +147,7 @@ mod tests {
                 INF,
                 0,
                 4,
+                false,
             );
             assert!(!pos.in_check());
             assert!(stats.best_move.is_some());
@@ -176,6 +180,7 @@ mod tests {
                 INF,
                 0,
                 4,
+                false,
             );
             assert!(!pos.in_check());
             assert!(stats.best_move.is_some());
@@ -208,6 +213,7 @@ mod tests {
                 INF,
                 0,
                 4,
+                false,
             );
             assert!(!pos.in_check());
             assert!(stats.best_move.is_some());

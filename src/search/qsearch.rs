@@ -50,13 +50,14 @@ pub fn qsearch(pos: &Position, stats: &mut Stats, mut alpha: i32, beta: i32, ply
     stats.seldepth = std::cmp::max(stats.seldepth, ply);
 
     if stand_pat >= beta {
-        return beta;
+        return stand_pat;
     }
 
     if stand_pat > alpha {
         alpha = stand_pat;
     }
 
+    let mut best_score = stand_pat;
     let mut moves = pos.legal_captures();
     sort(&pos, &mut moves);
 
@@ -65,6 +66,10 @@ pub fn qsearch(pos: &Position, stats: &mut Stats, mut alpha: i32, beta: i32, ply
 
         let npos = pos.after_move::<false>(&mv);
         let score = -qsearch(&npos, stats, -beta, -alpha, ply + 1);
+
+        if score > best_score {
+            best_score = score;
+        }
 
         if score > alpha {
             alpha = score;
@@ -75,5 +80,5 @@ pub fn qsearch(pos: &Position, stats: &mut Stats, mut alpha: i32, beta: i32, ply
         }
     }
 
-    alpha
+    best_score
 }
