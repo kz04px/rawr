@@ -107,6 +107,26 @@ impl Bitboard {
     }
 
     #[must_use]
+    pub fn ray_north(sq: Square) -> Self {
+        Bitboard::from_file(sq) & !Bitboard((1u64 << sq.0) - 1) ^ Bitboard::from_square(sq)
+    }
+
+    #[must_use]
+    pub fn ray_south(sq: Square) -> Self {
+        Bitboard::from_file(sq) & Bitboard((1u64 << sq.0) - 1)
+    }
+
+    #[must_use]
+    pub fn ray_east(sq: Square) -> Self {
+        Bitboard::from_rank(sq) & !Bitboard((1u64 << sq.0) - 1) ^ Bitboard::from_square(sq)
+    }
+
+    #[must_use]
+    pub fn ray_west(sq: Square) -> Self {
+        Bitboard::from_rank(sq) & Bitboard((1u64 << sq.0) - 1)
+    }
+
+    #[must_use]
     pub const fn count(&self) -> i32 {
         self.0.count_ones() as i32
     }
@@ -340,5 +360,23 @@ mod tests {
             Bitboard(0x8100000000000081).hsb(),
             Square::from_coords(7, 7)
         );
+    }
+
+    #[test]
+    fn rays() {
+        assert_eq!(Bitboard::ray_north(E4), Bitboard(0x1010101000000000));
+        assert_eq!(Bitboard::ray_south(E4), Bitboard(0x101010));
+        assert_eq!(Bitboard::ray_east(E4), Bitboard(0xe0000000));
+        assert_eq!(Bitboard::ray_west(E4), Bitboard(0xf000000));
+
+        assert_eq!(Bitboard::ray_north(A1), Bitboard(0x101010101010100));
+        assert_eq!(Bitboard::ray_south(A1), Bitboard(0x0));
+        assert_eq!(Bitboard::ray_east(A1), Bitboard(0xfe));
+        assert_eq!(Bitboard::ray_west(A1), Bitboard(0x0));
+
+        assert_eq!(Bitboard::ray_north(H8), Bitboard(0x0));
+        assert_eq!(Bitboard::ray_south(H8), Bitboard(0x80808080808080));
+        assert_eq!(Bitboard::ray_east(H8), Bitboard(0x0));
+        assert_eq!(Bitboard::ray_west(H8), Bitboard(0x7f00000000000000));
     }
 }

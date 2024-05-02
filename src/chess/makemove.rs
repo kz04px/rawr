@@ -124,5 +124,6 @@ impl Position {
         if UPDATE_HASH {
             debug_assert_eq!(self.hash, self.calculate_hash());
         }
+        debug_assert!(self.validate().is_ok());
     }
 }
