@@ -3,7 +3,7 @@ use crate::chess::{
     mv::Mv,
     piece::Piece,
     position::Position,
-    square::{C1, G1},
+    square::{Square, SquareIdx},
 };
 
 impl Mv {
@@ -20,9 +20,9 @@ impl Mv {
         let to = {
             let sq = if !pos.is_frc && pos.get_us().is_set(self.to) {
                 if self.to.file() > self.from.file() {
-                    G1
+                    Square::from_index(SquareIdx::G1)
                 } else {
-                    C1
+                    Square::from_index(SquareIdx::C1)
                 }
             } else {
                 self.to

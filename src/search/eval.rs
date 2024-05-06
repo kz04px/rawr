@@ -248,8 +248,17 @@ mod tests {
 
     #[test]
     fn test_king_shield() {
-        assert_eq!(get_king_shield(E4), Bitboard(0x383800000000));
-        assert_eq!(get_king_shield(A1), Bitboard(0x30300));
-        assert_eq!(get_king_shield(H1), Bitboard(0xc0c000));
+        assert_eq!(
+            get_king_shield(Square::from_index(SquareIdx::E4)),
+            Bitboard(0x383800000000)
+        );
+        assert_eq!(
+            get_king_shield(Square::from_index(SquareIdx::A1)),
+            Bitboard(0x30300)
+        );
+        assert_eq!(
+            get_king_shield(Square::from_index(SquareIdx::H1)),
+            Bitboard(0xc0c000)
+        );
     }
 }

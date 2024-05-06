@@ -1,4 +1,5 @@
 use crate::chess::square::Square;
+use crate::chess::square::SquareIdx;
 use std::fmt;
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not};
 
@@ -7,8 +8,8 @@ pub struct Bitboard(pub u64);
 
 impl Bitboard {
     #[must_use]
-    pub const fn from_index(sq: u8) -> Self {
-        Self(1u64 << sq)
+    pub const fn from_index(idx: SquareIdx) -> Self {
+        Self(1u64 << (idx as u8))
     }
 
     #[must_use]
@@ -255,15 +256,26 @@ mod tests {
 
     #[test]
     fn file_rank() {
-        assert!(Bitboard::from_file(E4) == Bitboard(0x1010101010101010));
-        assert!(Bitboard::from_rank(E4) == Bitboard(0xff000000));
+        assert!(
+            Bitboard::from_file(Square::from_index(SquareIdx::E4)) == Bitboard(0x1010101010101010)
+        );
+        assert!(Bitboard::from_rank(Square::from_index(SquareIdx::E4)) == Bitboard(0xff000000));
     }
 
     #[test]
     fn adj_files() {
-        assert!(Bitboard::from_adj_files(E4) == Bitboard(0x2828282828282828));
-        assert!(Bitboard::from_adj_files(A1) == Bitboard(0x202020202020202));
-        assert!(Bitboard::from_adj_files(H1) == Bitboard(0x4040404040404040));
+        assert!(
+            Bitboard::from_adj_files(Square::from_index(SquareIdx::E4))
+                == Bitboard(0x2828282828282828)
+        );
+        assert!(
+            Bitboard::from_adj_files(Square::from_index(SquareIdx::A1))
+                == Bitboard(0x202020202020202)
+        );
+        assert!(
+            Bitboard::from_adj_files(Square::from_index(SquareIdx::H1))
+                == Bitboard(0x4040404040404040)
+        );
     }
 
     #[test]
@@ -364,19 +376,55 @@ mod tests {
 
     #[test]
     fn rays() {
-        assert_eq!(Bitboard::ray_north(E4), Bitboard(0x1010101000000000));
-        assert_eq!(Bitboard::ray_south(E4), Bitboard(0x101010));
-        assert_eq!(Bitboard::ray_east(E4), Bitboard(0xe0000000));
-        assert_eq!(Bitboard::ray_west(E4), Bitboard(0xf000000));
+        assert_eq!(
+            Bitboard::ray_north(Square::from_index(SquareIdx::E4)),
+            Bitboard(0x1010101000000000)
+        );
+        assert_eq!(
+            Bitboard::ray_south(Square::from_index(SquareIdx::E4)),
+            Bitboard(0x101010)
+        );
+        assert_eq!(
+            Bitboard::ray_east(Square::from_index(SquareIdx::E4)),
+            Bitboard(0xe0000000)
+        );
+        assert_eq!(
+            Bitboard::ray_west(Square::from_index(SquareIdx::E4)),
+            Bitboard(0xf000000)
+        );
 
-        assert_eq!(Bitboard::ray_north(A1), Bitboard(0x101010101010100));
-        assert_eq!(Bitboard::ray_south(A1), Bitboard(0x0));
-        assert_eq!(Bitboard::ray_east(A1), Bitboard(0xfe));
-        assert_eq!(Bitboard::ray_west(A1), Bitboard(0x0));
+        assert_eq!(
+            Bitboard::ray_north(Square::from_index(SquareIdx::A1)),
+            Bitboard(0x101010101010100)
+        );
+        assert_eq!(
+            Bitboard::ray_south(Square::from_index(SquareIdx::A1)),
+            Bitboard(0x0)
+        );
+        assert_eq!(
+            Bitboard::ray_east(Square::from_index(SquareIdx::A1)),
+            Bitboard(0xfe)
+        );
+        assert_eq!(
+            Bitboard::ray_west(Square::from_index(SquareIdx::A1)),
+            Bitboard(0x0)
+        );
 
-        assert_eq!(Bitboard::ray_north(H8), Bitboard(0x0));
-        assert_eq!(Bitboard::ray_south(H8), Bitboard(0x80808080808080));
-        assert_eq!(Bitboard::ray_east(H8), Bitboard(0x0));
-        assert_eq!(Bitboard::ray_west(H8), Bitboard(0x7f00000000000000));
+        assert_eq!(
+            Bitboard::ray_north(Square::from_index(SquareIdx::H8)),
+            Bitboard(0x0)
+        );
+        assert_eq!(
+            Bitboard::ray_south(Square::from_index(SquareIdx::H8)),
+            Bitboard(0x80808080808080)
+        );
+        assert_eq!(
+            Bitboard::ray_east(Square::from_index(SquareIdx::H8)),
+            Bitboard(0x0)
+        );
+        assert_eq!(
+            Bitboard::ray_west(Square::from_index(SquareIdx::H8)),
+            Bitboard(0x7f00000000000000)
+        );
     }
 }

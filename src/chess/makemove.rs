@@ -74,15 +74,15 @@ impl Position {
 
             // King
             self.colours[Side::Us as usize] ^= Bitboard::from_square(mv.from);
-            self.colours[Side::Us as usize] ^= Bitboard::from_square(G1);
+            self.colours[Side::Us as usize] ^= Bitboard::from_index(SquareIdx::G1);
             self.pieces[Piece::King as usize] ^= Bitboard::from_square(mv.from);
-            self.pieces[Piece::King as usize] ^= Bitboard::from_square(G1);
+            self.pieces[Piece::King as usize] ^= Bitboard::from_index(SquareIdx::G1);
 
             // Rook
             self.colours[Side::Us as usize] ^= Bitboard::from_square(ksc_sq);
-            self.colours[Side::Us as usize] ^= Bitboard::from_square(F1);
+            self.colours[Side::Us as usize] ^= Bitboard::from_index(SquareIdx::F1);
             self.pieces[Piece::Rook as usize] ^= Bitboard::from_square(ksc_sq);
-            self.pieces[Piece::Rook as usize] ^= Bitboard::from_square(F1);
+            self.pieces[Piece::Rook as usize] ^= Bitboard::from_index(SquareIdx::F1);
         }
         // Queen side castle
         else if (self.get_kings() & self.get_rooks()).is_occupied() && mv.to.0 < mv.from.0 {
@@ -95,15 +95,15 @@ impl Position {
 
             // King
             self.colours[Side::Us as usize] ^= Bitboard::from_square(mv.from);
-            self.colours[Side::Us as usize] ^= Bitboard::from_square(C1);
+            self.colours[Side::Us as usize] ^= Bitboard::from_index(SquareIdx::C1);
             self.pieces[Piece::King as usize] ^= Bitboard::from_square(mv.from);
-            self.pieces[Piece::King as usize] ^= Bitboard::from_square(C1);
+            self.pieces[Piece::King as usize] ^= Bitboard::from_index(SquareIdx::C1);
 
             // Rook
             self.colours[Side::Us as usize] ^= Bitboard::from_square(qsc_sq);
-            self.colours[Side::Us as usize] ^= Bitboard::from_square(D1);
+            self.colours[Side::Us as usize] ^= Bitboard::from_index(SquareIdx::D1);
             self.pieces[Piece::Rook as usize] ^= Bitboard::from_square(qsc_sq);
-            self.pieces[Piece::Rook as usize] ^= Bitboard::from_square(D1);
+            self.pieces[Piece::Rook as usize] ^= Bitboard::from_index(SquareIdx::D1);
         }
 
         // Promo

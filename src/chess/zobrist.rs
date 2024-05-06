@@ -860,7 +860,7 @@ impl Position {
             hash ^= KEYS[get_index(
                 self.turn,
                 Piece::King,
-                G1.maybe_flip(self.turn == Colour::Black),
+                Square::from_index(SquareIdx::G1).maybe_flip(self.turn == Colour::Black),
             )];
 
             // Rook
@@ -872,7 +872,7 @@ impl Position {
             hash ^= KEYS[get_index(
                 self.turn,
                 Piece::Rook,
-                F1.maybe_flip(self.turn == Colour::Black),
+                Square::from_index(SquareIdx::F1).maybe_flip(self.turn == Colour::Black),
             )];
         }
         // Queen side castle
@@ -885,7 +885,7 @@ impl Position {
             hash ^= KEYS[get_index(
                 self.turn,
                 Piece::King,
-                C1.maybe_flip(self.turn == Colour::Black),
+                Square::from_index(SquareIdx::C1).maybe_flip(self.turn == Colour::Black),
             )];
 
             // Rook
@@ -897,7 +897,7 @@ impl Position {
             hash ^= KEYS[get_index(
                 self.turn,
                 Piece::Rook,
-                D1.maybe_flip(self.turn == Colour::Black),
+                Square::from_index(SquareIdx::D1).maybe_flip(self.turn == Colour::Black),
             )];
         }
 

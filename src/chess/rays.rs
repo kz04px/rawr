@@ -149,17 +149,26 @@ mod tests {
 
     #[test]
     fn test_pawns() {
-        assert_eq!(pawns::<true>(Bitboard::from_square(A1)), Bitboard(0x200));
-        assert_eq!(pawns::<true>(Bitboard::from_square(H1)), Bitboard(0x4000));
         assert_eq!(
-            pawns::<true>(Bitboard::from_square(E4)),
+            pawns::<true>(Bitboard::from_index(SquareIdx::A1)),
+            Bitboard(0x200)
+        );
+        assert_eq!(
+            pawns::<true>(Bitboard::from_index(SquareIdx::H1)),
+            Bitboard(0x4000)
+        );
+        assert_eq!(
+            pawns::<true>(Bitboard::from_index(SquareIdx::E4)),
             Bitboard(0x2800000000)
         );
     }
 
     #[test]
     fn test_knights() {
-        assert_eq!(knights(Bitboard::from_square(A1)), Bitboard(0x20400));
+        assert_eq!(
+            knights(Bitboard::from_index(SquareIdx::A1)),
+            Bitboard(0x20400)
+        );
         assert_eq!(knights(Bitboard(0x80)), Bitboard(0x402000));
         assert_eq!(
             knights(Bitboard(0x100000000000000)),
@@ -173,33 +182,81 @@ mod tests {
 
     #[test]
     fn test_ray_ne() {
-        assert_eq!(ray_ne(A1, Bitboard::empty()), Bitboard(0x8040201008040200));
-        assert_eq!(ray_ne(A8, Bitboard::empty()), Bitboard(0x0));
-        assert_eq!(ray_ne(H1, Bitboard::empty()), Bitboard(0x0));
-        assert_eq!(ray_ne(H8, Bitboard::empty()), Bitboard(0x0));
+        assert_eq!(
+            ray_ne(Square::from_index(SquareIdx::A1), Bitboard::empty()),
+            Bitboard(0x8040201008040200)
+        );
+        assert_eq!(
+            ray_ne(Square::from_index(SquareIdx::A8), Bitboard::empty()),
+            Bitboard(0x0)
+        );
+        assert_eq!(
+            ray_ne(Square::from_index(SquareIdx::H1), Bitboard::empty()),
+            Bitboard(0x0)
+        );
+        assert_eq!(
+            ray_ne(Square::from_index(SquareIdx::H8), Bitboard::empty()),
+            Bitboard(0x0)
+        );
     }
 
     #[test]
     fn test_ray_nw() {
-        assert_eq!(ray_nw(A1, Bitboard::empty()), Bitboard(0x0));
-        assert_eq!(ray_nw(A8, Bitboard::empty()), Bitboard(0x0));
-        assert_eq!(ray_nw(H1, Bitboard::empty()), Bitboard(0x102040810204000));
-        assert_eq!(ray_nw(H8, Bitboard::empty()), Bitboard(0x0));
+        assert_eq!(
+            ray_nw(Square::from_index(SquareIdx::A1), Bitboard::empty()),
+            Bitboard(0x0)
+        );
+        assert_eq!(
+            ray_nw(Square::from_index(SquareIdx::A8), Bitboard::empty()),
+            Bitboard(0x0)
+        );
+        assert_eq!(
+            ray_nw(Square::from_index(SquareIdx::H1), Bitboard::empty()),
+            Bitboard(0x102040810204000)
+        );
+        assert_eq!(
+            ray_nw(Square::from_index(SquareIdx::H8), Bitboard::empty()),
+            Bitboard(0x0)
+        );
     }
 
     #[test]
     fn test_ray_se() {
-        assert_eq!(ray_se(A1, Bitboard::empty()), Bitboard(0x0));
-        assert_eq!(ray_se(A8, Bitboard::empty()), Bitboard(0x2040810204080));
-        assert_eq!(ray_se(H1, Bitboard::empty()), Bitboard(0x0));
-        assert_eq!(ray_se(H8, Bitboard::empty()), Bitboard(0x0));
+        assert_eq!(
+            ray_se(Square::from_index(SquareIdx::A1), Bitboard::empty()),
+            Bitboard(0x0)
+        );
+        assert_eq!(
+            ray_se(Square::from_index(SquareIdx::A8), Bitboard::empty()),
+            Bitboard(0x2040810204080)
+        );
+        assert_eq!(
+            ray_se(Square::from_index(SquareIdx::H1), Bitboard::empty()),
+            Bitboard(0x0)
+        );
+        assert_eq!(
+            ray_se(Square::from_index(SquareIdx::H8), Bitboard::empty()),
+            Bitboard(0x0)
+        );
     }
 
     #[test]
     fn test_ray_sw() {
-        assert_eq!(ray_sw(A1, Bitboard::empty()), Bitboard(0x0));
-        assert_eq!(ray_sw(A8, Bitboard::empty()), Bitboard(0x0));
-        assert_eq!(ray_sw(H1, Bitboard::empty()), Bitboard(0x0));
-        assert_eq!(ray_sw(H8, Bitboard::empty()), Bitboard(0x40201008040201));
+        assert_eq!(
+            ray_sw(Square::from_index(SquareIdx::A1), Bitboard::empty()),
+            Bitboard(0x0)
+        );
+        assert_eq!(
+            ray_sw(Square::from_index(SquareIdx::A8), Bitboard::empty()),
+            Bitboard(0x0)
+        );
+        assert_eq!(
+            ray_sw(Square::from_index(SquareIdx::H1), Bitboard::empty()),
+            Bitboard(0x0)
+        );
+        assert_eq!(
+            ray_sw(Square::from_index(SquareIdx::H8), Bitboard::empty()),
+            Bitboard(0x40201008040201)
+        );
     }
 }

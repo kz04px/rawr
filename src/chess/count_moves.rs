@@ -5,7 +5,7 @@ use crate::chess::position::Position;
 use crate::chess::rays;
 use crate::chess::side::Side;
 use crate::chess::square::Square;
-use crate::chess::square::{C1, D1, F1, G1};
+use crate::chess::square::SquareIdx;
 
 #[must_use]
 fn line_between(sq1: Square, sq2: Square) -> Bitboard {
@@ -343,13 +343,13 @@ impl Position {
         }
 
         let ksc_sq = Square::from_coords(self.castle_files[0], 0);
-        let ksc_king_path = line_between(ksq, G1);
-        let ksc_rook_path = line_between(ksc_sq, F1);
+        let ksc_king_path = line_between(ksq, Square::from_index(SquareIdx::G1));
+        let ksc_rook_path = line_between(ksc_sq, Square::from_index(SquareIdx::F1));
         let ksc_both_path = ksc_king_path | ksc_rook_path;
 
         let qsc_sq = Square::from_coords(self.castle_files[1], 0);
-        let qsc_king_path = line_between(ksq, C1);
-        let qsc_rook_path = line_between(qsc_sq, D1);
+        let qsc_king_path = line_between(ksq, Square::from_index(SquareIdx::C1));
+        let qsc_rook_path = line_between(qsc_sq, Square::from_index(SquareIdx::D1));
         let qsc_both_path = qsc_king_path | qsc_rook_path;
 
         // King side castling

@@ -376,13 +376,13 @@ impl Position {
         }
 
         let ksc_sq = Square::from_coords(self.castle_files[0], 0);
-        let ksc_king_path = line_between(ksq, G1);
-        let ksc_rook_path = line_between(ksc_sq, F1);
+        let ksc_king_path = line_between(ksq, Square::from_index(SquareIdx::G1));
+        let ksc_rook_path = line_between(ksc_sq, Square::from_index(SquareIdx::F1));
         let ksc_both_path = ksc_king_path | ksc_rook_path;
 
         let qsc_sq = Square::from_coords(self.castle_files[1], 0);
-        let qsc_king_path = line_between(ksq, C1);
-        let qsc_rook_path = line_between(qsc_sq, D1);
+        let qsc_king_path = line_between(ksq, Square::from_index(SquareIdx::C1));
+        let qsc_rook_path = line_between(qsc_sq, Square::from_index(SquareIdx::D1));
         let qsc_both_path = qsc_king_path | qsc_rook_path;
 
         // King side castling
