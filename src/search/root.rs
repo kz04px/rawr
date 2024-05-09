@@ -8,7 +8,7 @@ use crate::chess::{mv::Mv, position::Position};
 use crate::search::*;
 use std::time::Instant;
 
-const MAX_DEPTH: i32 = 128;
+pub const MAX_DEPTH: i32 = 128;
 
 #[must_use]
 pub fn root(

@@ -1,6 +1,9 @@
-use crate::chess::{bitboard::Bitboard, position::Position, square::Square};
-
-use super::score::Score;
+use crate::chess::bitboard::Bitboard;
+use crate::chess::position::Position;
+use crate::chess::square::Square;
+use crate::search::negamax::MATE_SCORE;
+use crate::search::root::MAX_DEPTH;
+use crate::search::score::Score;
 
 const PIECE_VALUES: [Score; 6] = [
     Score(100, 100),
@@ -176,13 +179,33 @@ pub fn eval(pos: &Position) -> i32 {
     let score = eval_us(pos) - eval_us(&Position::from_flipped(pos));
     let phase = get_phase(&pos);
     let tapered = taper(&score, phase);
+    debug_assert!(-MATE_SCORE + MAX_DEPTH < tapered && tapered < MATE_SCORE - MAX_DEPTH);
     tapered
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::chess::{bitboard::Bitboard, square::*};
+    use crate::chess::bitboard::Bitboard;
+    use crate::chess::square::SquareIdx;
+
+    #[test]
+    fn test_ahead() {
+        let fens = [
+            "4k3/8/8/8/8/8/PPPPPPPP/4K3 w - - 0 1",
+            "4k3/8/8/8/8/8/NNNNNNNN/4K3 w - - 0 1",
+            "4k3/8/8/8/8/8/BBBBBBBB/4K3 w - - 0 1",
+            "4k3/8/8/8/8/8/RRRR1RRR/4K3 w - - 0 1",
+            "4k3/8/8/8/8/8/QQQQ1QQQ/4K3 w - - 0 1",
+            "4k3/1QQR1RQQ/1QQQKQQ1/1BBNN3/8/8/8/8 w - - 0 1",
+        ];
+
+        for fen in fens {
+            let pos = Position::from_fen(fen);
+            let eval = eval(&pos);
+            assert!(eval > 0);
+        }
+    }
 
     #[test]
     fn test_passers() {

@@ -6,7 +6,7 @@ use crate::search::ttentry::Flag;
 use crate::search::ttentry::TTEntry;
 
 pub const INF: i32 = 10_000_000;
-const MATE_SCORE: i32 = 1_000_000;
+pub const MATE_SCORE: i32 = 1_000_000;
 const DRAW_SCORE: i32 = -50;
 
 #[must_use]
