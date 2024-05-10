@@ -146,23 +146,54 @@ pub fn negamax(
     let mut moves = pos.legal_moves();
     sort(&pos, &mut moves, &ttmove);
 
-    for mv in &moves {
+    for (idx, mv) in moves.iter().enumerate() {
         stats.nodes += 1;
         let npos = pos.after_move::<true>(&mv);
         history.push(npos.hash);
 
-        let score = -negamax(
-            &npos,
-            history,
-            tt,
-            stats,
-            should_stop,
-            -beta,
-            -alpha,
-            ply + 1,
-            depth - 1,
-            true,
-        );
+        let score = if idx == 0 {
+            -negamax(
+                &npos,
+                history,
+                tt,
+                stats,
+                should_stop,
+                -beta,
+                -alpha,
+                ply + 1,
+                depth - 1,
+                true,
+            )
+        } else {
+            let mut score = -negamax(
+                &npos,
+                history,
+                tt,
+                stats,
+                should_stop,
+                -alpha - 1,
+                -alpha,
+                ply + 1,
+                depth - 1,
+                true,
+            );
+            if alpha < score && score < beta {
+                score = -negamax(
+                    &npos,
+                    history,
+                    tt,
+                    stats,
+                    should_stop,
+                    -beta,
+                    -alpha,
+                    ply + 1,
+                    depth - 1,
+                    true,
+                );
+            }
+            score
+        };
+
         history.pop();
 
         if score > best_score {
