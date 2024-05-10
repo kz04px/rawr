@@ -39,6 +39,11 @@ impl<T: Copy + Default + PartialEq> Hashtable<T> {
         Some(filled)
     }
 
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.entries.len()
+    }
+
     pub fn resize(&mut self, megabytes: usize) {
         let num_entries = (megabytes as usize * 1024 * 1024) / std::mem::size_of::<T>();
         self.entries.resize(num_entries, T::default());
@@ -61,12 +66,19 @@ mod tests {
     fn basic() {
         let mut tt = Hashtable::<i32>::new(1);
 
-        assert_eq!(tt.poll(0), 0);
+        for i in 0..tt.len() {
+            let key = i as u64;
+            assert_eq!(tt.poll(key), 0);
+        }
 
-        tt.add(0, &1);
-        assert_eq!(tt.poll(0), 1);
+        for i in 0..4 * tt.len() {
+            let key = i as u64;
 
-        tt.add(0, &2);
-        assert_eq!(tt.poll(0), 2);
+            tt.add(key, &1);
+            assert_eq!(tt.poll(key), 1);
+
+            tt.add(key, &2);
+            assert_eq!(tt.poll(key), 2);
+        }
     }
 }

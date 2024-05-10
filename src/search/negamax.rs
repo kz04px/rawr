@@ -65,7 +65,7 @@ pub fn negamax(
     stats: &mut Stats,
     should_stop: &impl Fn(&Stats) -> bool,
     mut alpha: i32,
-    beta: i32,
+    mut beta: i32,
     ply: i32,
     mut depth: i32,
     can_nullmove: bool,
@@ -77,6 +77,7 @@ pub fn negamax(
     let alpha_orig = alpha;
     let in_check = pos.in_check();
     let is_root = ply == 0;
+    let is_pv = beta != alpha + 1;
 
     stats.seldepth = std::cmp::max(stats.seldepth, ply);
 
@@ -90,6 +91,20 @@ pub fn negamax(
     let mut ttmove = None;
     if ttentry.hash == pos.hash {
         ttmove = Some(ttentry.mv);
+
+        if ttentry.depth >= depth && !is_root && !is_pv {
+            match ttentry.flag {
+                Flag::Exact => {
+                    return ttentry.score;
+                }
+                Flag::Lower => alpha = std::cmp::max(alpha, ttentry.score),
+                Flag::Upper => beta = std::cmp::min(beta, ttentry.score),
+            }
+
+            if alpha >= beta {
+                return ttentry.score;
+            }
+        }
     }
 
     if depth <= 0 {
