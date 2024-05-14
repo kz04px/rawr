@@ -1,6 +1,7 @@
 use crate::chess::mv::Mv;
 use crate::chess::piece::Piece;
 use crate::chess::position::Position;
+use crate::search::eval::eval;
 use crate::search::hashtable::Hashtable;
 use crate::search::qsearch::qsearch;
 use crate::search::stats::Stats;
@@ -131,6 +132,12 @@ pub fn negamax(
 
     if is_50move || is_threefold {
         return DRAW_SCORE;
+    }
+
+    // Reverse futility pruning
+    let static_eval = eval(pos);
+    if !is_pv && !in_check && depth < 4 && static_eval - 100 * depth >= beta {
+        return static_eval - 100 * depth;
     }
 
     // Null move pruning
