@@ -1,4 +1,6 @@
-use crate::chess::{mv::Mv, position::Position};
+use crate::chess::mv::Mv;
+use crate::chess::piece::Piece;
+use crate::chess::position::Position;
 use crate::search::hashtable::Hashtable;
 use crate::search::qsearch::qsearch;
 use crate::search::stats::Stats;
@@ -180,6 +182,16 @@ pub fn negamax(
                 true,
             )
         } else {
+            // LMR
+            let is_capturing = pos.is_capture(mv);
+            let is_queen_promotion = mv.promo == Piece::Queen;
+            let reduction =
+                if idx < 4 || depth < 3 || in_check || is_capturing || is_queen_promotion {
+                    0
+                } else {
+                    1
+                };
+
             let mut score = -negamax(
                 &npos,
                 history,
@@ -189,7 +201,7 @@ pub fn negamax(
                 -alpha - 1,
                 -alpha,
                 ply + 1,
-                depth - 1,
+                depth - 1 - reduction,
                 true,
             );
             if alpha < score && score < beta {

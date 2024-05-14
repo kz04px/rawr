@@ -1,5 +1,6 @@
 use crate::chess::bitboard::Bitboard;
 use crate::chess::colour::Colour;
+use crate::chess::mv::Mv;
 use crate::chess::piece::Piece;
 use crate::chess::side::Side;
 use crate::chess::square::Square;
@@ -206,6 +207,12 @@ impl Position {
     pub fn is_empty(&self, sq: Square) -> bool {
         !self.is_occupied(sq)
     }
+
+    #[must_use]
+    pub fn is_capture(&self, mv: &Mv) -> bool {
+        self.get_them().is_set(mv.to)
+            || (self.get_pawns().is_set(mv.from) && self.ep.is_some() && self.ep.unwrap() == mv.to)
+    }
 }
 
 impl fmt::Display for Position {
@@ -295,5 +302,92 @@ impl fmt::Display for Position {
         writeln!(f, "FRC: {}", self.is_frc)?;
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::chess::square::SquareIdx;
+
+    #[test]
+    fn startpos() {
+        let pos = Position::startpos();
+        let moves = pos.legal_moves();
+        for mv in moves {
+            assert!(!pos.is_capture(&mv));
+        }
+    }
+
+    #[test]
+    fn captures() {
+        let pos = Position::from_fen("r3k2r/6P1/5B2/3pP3/8/2N5/8/R3K2R w KQkq d6 0 2");
+        let captures = [
+            // En passant
+            (SquareIdx::E5, SquareIdx::D6, Piece::None),
+            // Promotion
+            (SquareIdx::G7, SquareIdx::H8, Piece::Queen),
+            (SquareIdx::G7, SquareIdx::H8, Piece::Rook),
+            (SquareIdx::G7, SquareIdx::H8, Piece::Bishop),
+            (SquareIdx::G7, SquareIdx::H8, Piece::Knight),
+            // Regular
+            (SquareIdx::C3, SquareIdx::D5, Piece::None),
+            (SquareIdx::A1, SquareIdx::A8, Piece::None),
+            (SquareIdx::H1, SquareIdx::H8, Piece::None),
+        ];
+
+        for (from, to, promo) in captures {
+            let mv = Mv {
+                from: Square::from_index(from),
+                to: Square::from_index(to),
+                promo,
+            };
+            assert!(pos.is_capture(&mv));
+        }
+    }
+
+    #[test]
+    fn noncaptures() {
+        let pos = Position::from_fen("r3k2r/6P1/5B2/3pP3/8/2N5/8/R3K2R w KQkq d6 0 2");
+        let noncaptures = [
+            // Castling
+            (SquareIdx::E1, SquareIdx::H1, Piece::None),
+            (SquareIdx::E1, SquareIdx::A1, Piece::None),
+            // Promotion
+            (SquareIdx::G7, SquareIdx::G8, Piece::Queen),
+            (SquareIdx::G7, SquareIdx::G8, Piece::Rook),
+            (SquareIdx::G7, SquareIdx::G8, Piece::Bishop),
+            (SquareIdx::G7, SquareIdx::G8, Piece::Knight),
+            // Regular
+            (SquareIdx::E5, SquareIdx::E6, Piece::None),
+            (SquareIdx::E1, SquareIdx::F2, Piece::None),
+        ];
+
+        for (from, to, promo) in noncaptures {
+            let mv = Mv {
+                from: Square::from_index(from),
+                to: Square::from_index(to),
+                promo,
+            };
+            assert!(!pos.is_capture(&mv));
+        }
+    }
+
+    #[test]
+    fn capture_movegen() {
+        let fens = [
+            "r3k2r/6P1/5B2/3pP3/8/2N5/8/R3K2R w KQkq d6 0 2",
+            "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+            "4k3/8/8/8/8/8/8/4K2R w K - 0 1",
+            "r3k1r1/8/8/8/8/8/8/R3K2R w KQq - 0 1",
+            "8/1n4N1/2k5/8/8/5K2/1N4n1/8 b - - 0 1",
+        ];
+        for fen in fens {
+            let pos = Position::from_fen(fen);
+            let captures = pos.legal_captures();
+            for capture in captures {
+                assert!(pos.is_capture(&capture));
+            }
+        }
     }
 }
