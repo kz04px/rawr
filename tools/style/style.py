@@ -62,6 +62,10 @@ class Stats:
     mid_pawn_pushes: list[int] = field(default_factory=[0 for _ in range(0, 8)].copy)
     late_pawn_pushes: list[int] = field(default_factory=[0 for _ in range(0, 8)].copy)
     total_pawn_pushes: int = 0
+    total_pawn_pushes_towards_king: int = 0
+    # Bishop/Rook/Queen threats
+    num_rook_threats: int = 0
+    num_bishop_threats: int = 0
 
     def add_capture(self, ply: int):
         self.total_captures += 1
@@ -79,7 +83,7 @@ class Stats:
         self.total_noncaptures += 1
         self.total_moves += 1
 
-    def add_pawn_push(self, ply: int, to: chess.Square, side: chess.Color):
+    def add_pawn_push(self, ply: int, to: chess.Square, side: chess.Color, enemy_ksq: chess.Square):
         self.total_pawn_pushes += 1
 
         to_rank = chess.square_rank(to)
@@ -91,6 +95,11 @@ class Stats:
             self.mid_pawn_pushes[rank] += 1
         else:
             self.late_pawn_pushes[rank] += 1
+
+        # Towards enemy king
+        dx: int = chess.square_file(to) - chess.square_file(enemy_ksq)
+        if abs(dx) <= 1:
+            self.total_pawn_pushes_towards_king += 1
 
     def finish_game(self, ply: int):
         self.game_length[ply] += 1
@@ -146,6 +155,9 @@ def is_valid(stats: Stats) -> bool:
         return False
 
     if stats.late_pawn_pushes[0] > 0 or stats.late_pawn_pushes[1] > 0:
+        return False
+    
+    if stats.total_pawn_pushes_towards_king > stats.total_pawn_pushes:
         return False
 
     return True
@@ -239,6 +251,33 @@ def get_aggression_score(stats: Stats, verbose: bool = False) -> float:
 
         return stats.total_captures / stats.total_moves
 
+    def feature_push_pawn_towards_king(stats: Stats) -> float:
+        """
+        Pushing pawns towards the enemy king
+        """
+        if stats.total_pawn_pushes == 0:
+            return 0.0
+
+        return stats.total_pawn_pushes_towards_king / stats.total_pawn_pushes
+
+    def feature_rook_threats(stats: Stats) -> float:
+        """
+        Rooks and Queens on the same rank or file as the enemy king
+        """
+        if stats.total_moves == 0:
+            return 0.0
+
+        return stats.num_rook_threats / stats.total_moves
+
+    def feature_bishop_threats(stats: Stats) -> float:
+        """
+        Bishops and Queens on the same rank or file as the enemy king
+        """
+        if stats.total_moves == 0:
+            return 0.0
+
+        return stats.num_bishop_threats / stats.total_moves
+
     if stats.num_games == 0:
         return None
 
@@ -250,8 +289,11 @@ def get_aggression_score(stats: Stats, verbose: bool = False) -> float:
         (0.2,  "Castle opposite", feature_castle_opposite),
         (1.0,  "Push pawns", feature_push_pawns),
         (5.0,  "Checks", feature_checks),
-        (5.0, "Win while behind", feature_wins_behind),
-        (5.0, "Capture frequency", feature_capture_frequency),
+        (5.0,  "Win while behind", feature_wins_behind),
+        (5.0,  "Capture frequency", feature_capture_frequency),
+        (4.0,  "Push pawns towards king", feature_push_pawn_towards_king),
+        (4.0,  "Rook/Queen threats on king", feature_rook_threats),
+        (4.0,  "Bishop/Queen threats on king", feature_bishop_threats),
         # (0.0,  "Sacrifices", feature_sacrifices),
     ]
 
@@ -538,6 +580,8 @@ def analyse_game(game: chess.pgn.Game, side: chess.Color, stats: Stats) -> Stats
     for idx, move in enumerate(game.mainline_moves()):
         num_queens_white = len(board.pieces(chess.QUEEN, chess.WHITE))
         num_queens_black = len(board.pieces(chess.QUEEN, chess.BLACK))
+        piece = board.piece_type_at(move.from_square)
+        enemy_ksq = board.king(not board.turn)
 
         # Traded queens?
         if queens_gone == False and num_queens_white == 0 and num_queens_black == 0:
@@ -571,6 +615,16 @@ def analyse_game(game: chess.pgn.Game, side: chess.Color, stats: Stats) -> Stats
                 stats.castle_queen += 1
                 us_castled = 2
 
+            # Threats
+            dx: int = chess.square_file(enemy_ksq) - chess.square_file(move.to_square)
+            dy: int = chess.square_rank(enemy_ksq) - chess.square_rank(move.to_square)
+            if piece in [chess.ROOK, chess.QUEEN]:
+                if abs(dx) <= 1 or abs(dy) <= 1:
+                    stats.num_rook_threats += 1
+            if piece in [chess.BISHOP, chess.QUEEN]:
+                if abs(abs(dx) - abs(dy)) <= 1:
+                    stats.num_bishop_threats += 1
+
             # Move types
             if board.is_capture(move):
                 stats.add_capture(ply)
@@ -580,7 +634,7 @@ def analyse_game(game: chess.pgn.Game, side: chess.Color, stats: Stats) -> Stats
                 stats.noncapture_distance[dist_to_enemy_king] += 1
 
             if board.piece_type_at(move.from_square) == chess.PAWN:
-                stats.add_pawn_push(ply, move.to_square, board.turn)
+                stats.add_pawn_push(ply, move.to_square, board.turn, board.king(not board.turn))
 
         else:
             # Castling
@@ -706,6 +760,7 @@ def main():
     parser.add_argument("--wins", action="store_true", help="Analyse games - wins")
     parser.add_argument("--losses", action="store_true", help="Analyse games - losses")
     parser.add_argument("--draws", action="store_true", help="Analyse games - draws")
+    parser.add_argument("--all", action="store_true", help="Analyse games - all")
     args = parser.parse_args()
 
     filters = []
@@ -723,6 +778,8 @@ def main():
     #     # ("Black (draws only)",  Stats(), lambda player, side, game : player == args.player and side == chess.BLACK and game.headers["Result"] == "1/2-1/2"),
     # ]
 
+    if args.all:
+        filters.append(("All games", Stats(), lambda player, side, _ : player == args.player))
     if args.white:
         filters.append(("White", Stats(), lambda player, side, _ : player == args.player and side == chess.WHITE))
     if args.black:
